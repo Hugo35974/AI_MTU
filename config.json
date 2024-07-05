@@ -1,0 +1,52 @@
+{
+    "date": {
+      "start_date": "2019-05-01",
+      "end_date": "2020-02-28",
+      "predict_start_date": "2020-03-01",
+      "predict_end_date": "2020-04-30"
+    },
+    "variables": {
+      "variables_to_shift": ["ROI-DA", "Oil", "Gas"],
+      "target_variable": "ROI-DA",
+      "time_to_shift": [48, 53]
+    },
+  "transformations": {
+    "hour": "hour",
+    "day_of_week": "day_of_week",
+    "day_of_year": "day_of_year"
+    },
+    "model": {
+      "xgb": {
+        "subsample": 1,
+        "n_estimators": 150,
+        "max_depth": 11,
+        "learning_rate": 0.0125,
+        "colsample_bytree": 0.5
+      },
+      "lgb": {
+        "num_leaves" : 5,
+        "min_child_samples" : 60,
+        "learning_rate" : 0.0125,
+        "n_estimators" : 150,
+        "max_depth": 11,
+        "subsample": 1,
+        "colsample_bytree" : 0.5
+      },
+      "rfr" : {
+        "n_estimators": 500,         
+        "max_depth": 30,            
+        "min_samples_split": 2,      
+        "min_samples_leaf": 1,     
+        "max_features": "sqrt",      
+        "bootstrap": true           
+    }
+    },
+    "file_imports": {
+      "files": [
+        "ISEM_prices_multivariate_01_05_2019_to_31_04_2020.csv",
+        "Europe_Brent_Spot_Price_FOB.csv",
+        "Henry_Hub_Natural_Gas_Spot_Price.csv"
+      ]
+    }
+  }
+  
