@@ -2,7 +2,9 @@ pandas
 numpy
 matplotlib
 seaborn
-tqdm
 scikit-learn
 xgboost
 lightgbm
+os
+pathlib
+pandas

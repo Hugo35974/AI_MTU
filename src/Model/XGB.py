@@ -3,25 +3,24 @@ import numpy as np
 from sklearn.model_selection import RandomizedSearchCV
 from datetime import datetime
 
-# def XGBM_training(x, y):
-#     hyperparameters = {'learning_rate': [0.025, 0.0125],
-#                        'n_estimators': range(50, 500, 50),
-#                        'max_depth': range(3, 14, 2),
-#                        'subsample': np.arange(0.1, 1.1, 0.3),
-#                        'colsample_bytree': np.arange(0.1, 1.1, 0.3)}
+def XGBM_training(x, y):
+    hyperparameters = {'learning_rate': [0.025, 0.0125],
+                       'n_estimators': range(50, 500, 50),
+                       'max_depth': range(3, 14, 2),
+                       'subsample': np.arange(0.1, 1.1, 0.3),
+                       'colsample_bytree': np.arange(0.1, 1.1, 0.3)}
 
-#     model = XGBRegressor(n_jobs=1)
+    model = XGBRegressor(n_jobs=10)
 
-#     rsearch = RandomizedSearchCV(
-#         estimator=model, param_distributions=hyperparameters,
-#         scoring='neg_mean_absolute_error',
-#         n_jobs=10, cv=5, return_train_score=True,verbose=2)
+    rsearch = RandomizedSearchCV(
+        estimator=model, param_distributions=hyperparameters,
+        scoring='neg_mean_absolute_error',
+        n_jobs=10, cv=5, return_train_score=True,verbose=-1)
 
-#     rsearch.fit(x, y)
-#     print(rsearch.cv_results_)
-#     print(rsearch.best_params_)
-#     print(rsearch.best_score_)
-#     return rsearch.best_estimator_,rsearch
+    rsearch.fit(x, y)
+    # print(rsearch.cv_results_)
+    # print(rsearch.best_score_)
+    return rsearch.best_params_,rsearch.best_score_
 
 
 def XGBM_model(x,y,params):

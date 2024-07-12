@@ -1,14 +1,14 @@
 {
     "date": {
       "start_date": "2019-05-01",
-      "end_date": "2020-02-28",
+      "end_date": "2020-02-29",
       "predict_start_date": "2020-03-01",
       "predict_end_date": "2020-04-30"
     },
     "variables": {
-      "variables_to_shift": ["ROI-DA", "Oil", "Gas"],
+      "variables_to_shift": ["ROI-DA"],
       "target_variable": "ROI-DA",
-      "time_to_shift": [48, 53]
+      "time_to_shift": [24, 100]
     },
   "transformations": {
     "hour": "hour",
@@ -17,35 +17,57 @@
     },
     "model": {
       "xgb": {
-        "subsample": 1,
-        "n_estimators": 150,
-        "max_depth": 11,
+        "subsample": 0.4,
+        "n_estimators": 100,
+        "max_depth": 3,
         "learning_rate": 0.0125,
-        "colsample_bytree": 0.5
+        "colsample_bytree": 0.4
       },
       "lgb": {
-        "num_leaves" : 5,
+        "num_leaves" : 10,
         "min_child_samples" : 60,
         "learning_rate" : 0.0125,
-        "n_estimators" : 150,
-        "max_depth": 11,
-        "subsample": 1,
-        "colsample_bytree" : 0.5
+        "n_estimators" : 200,
+        "max_depth": 3,
+        "subsample": 0.1,
+        "colsample_bytree" : 0.4
       },
       "rfr" : {
-        "n_estimators": 500,         
+        "n_estimators": 400,         
         "max_depth": 30,            
-        "min_samples_split": 2,      
-        "min_samples_leaf": 1,     
+        "min_samples_split": 7,      
+        "min_samples_leaf": 9,     
         "max_features": "sqrt",      
         "bootstrap": true           
-    }
+    },
+    "rnn" : {
+      "input_size": 1,
+      "hidden_size": 30,
+      "num_layers": 3,
+      "output_size": 1,
+      "num_epochs": 10000,
+      "learning_rate": 0.01
+  }
+  
     },
     "file_imports": {
       "files": [
-        "ISEM_prices_multivariate_01_05_2019_to_31_04_2020.csv",
-        "Europe_Brent_Spot_Price_FOB.csv",
-        "Henry_Hub_Natural_Gas_Spot_Price.csv"
+        {
+          "file_name": "ISEM_prices_multivariate_01_05_2019_to_31_04_2020.csv",
+          "date_format": "%d/%m/%Y %H:%M"
+        },
+        {
+          "file_name": "Europe_Brent_Spot_Price_FOB.csv",
+          "date_format": "%m/%d/%Y"
+        },
+        {
+          "file_name": "Henry_Hub_Natural_Gas_Spot_Price.csv",
+          "date_format": "%m/%d/%Y"
+        },
+        {
+          "file_name": "hly2275.csv",
+          "date_format": "%d-%b-%Y %H:%M"
+        }
       ]
     }
   }

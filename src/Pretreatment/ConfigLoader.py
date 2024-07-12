@@ -1,15 +1,15 @@
-import pandas as pd 
-from Model import XGB
-from Pretreatment.DataProcessor import DataProcessor
-from Tools.tools import shifting,plot_prediction_results,eval_metrics
 from pathlib import Path
 import os
 import json
+import sys
 
-Project_Path = Path(__file__).parents[1]
+Project_Path = Path(__file__).parents[2]
+sys.path.append(Project_Path)
+
+from src.Pretreatment.DataProcessor import DataProcessor
 
 class ConfigLoader():
-    def __init__(self) -> None:
+    def __init__(self):
         self.config = self.loadconfig()
         self.date_config = self.extractdate()
         self.variables_config = self.extractvariables()
