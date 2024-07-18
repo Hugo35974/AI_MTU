@@ -1,13 +1,13 @@
 {
     "date": {
-      "start_date": "2019-05-01",
-      "end_date": "2020-02-29",
+      "start_date": "2020-01-01",
+      "end_date": "2020-12-31",
       "predict_start_date": "2020-03-01",
       "predict_end_date": "2020-04-30"
     },
     "variables": {
-      "variables_to_shift": ["ROI-DA"],
-      "target_variable": "ROI-DA",
+      "variables_to_shift": ["elec_prices"],
+      "target_variable": "elec_prices",
       "time_to_shift": [24, 100]
     },
   "transformations": {
@@ -40,21 +40,35 @@
         "max_features": "sqrt",      
         "bootstrap": true           
     },
-    "rnn" : {
-      "input_size": 1,
-      "hidden_size": 30,
-      "num_layers": 3,
+    "lstm" : {
+      "hidden_size": 83,
+      "num_layers": 1,
       "output_size": 1,
-      "num_epochs": 10000,
-      "learning_rate": 0.01
-  }
+      "num_epochs": 6748,
+      "learning_rate": 0.00027
+  },
+    "gru" : {
+      "hidden_size": 63,
+      "num_layers": 1,
+      "output_size": 1,
+      "num_epochs": 1415,
+      "learning_rate": 0.0014
+  },
+    "rnn" : {
+      "hidden_size": 39,
+      "num_layers": 1,
+      "output_size": 1,
+      "num_epochs": 6864,
+      "learning_rate": 0.00027
+    }
+
   
     },
     "file_imports": {
       "files": [
         {
-          "file_name": "ISEM_prices_multivariate_01_05_2019_to_31_04_2020.csv",
-          "date_format": "%d/%m/%Y %H:%M"
+          "file_name": "data_final_2019_2020.csv",
+          "date_format": "%Y-%m-%d %H:%M"
         },
         {
           "file_name": "Europe_Brent_Spot_Price_FOB.csv",

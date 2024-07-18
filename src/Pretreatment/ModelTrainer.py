@@ -31,14 +31,32 @@ class ModelTrainer(ConfigLoader):
         features += [self.transformations.get(attr, attr) for attr in ['hour', 'day_of_week', 'day_of_year']]
         return features   
     
-    def get_train_test_split(self, df):
-        """
-        Split the dataframe into training and testing datasets based on the configured dates.
-        """
-        data_train = df.loc[self.date_config["start_date"]:self.date_config["end_date"]]
-        data_test = df.loc[self.date_config["predict_start_date"]:self.date_config["predict_end_date"]]
-        return data_train, data_test
-
+    # def get_train_test_split(self, df):
+    #     """
+    #     Split the dataframe into training and testing datasets based on the configured dates.
+    #     """
+    #     data_train = df.loc[self.date_config["start_date"]:self.date_config["end_date"]]
+    #     data_test = df.loc[self.date_config["predict_start_date"]:self.date_config["predict_end_date"]]
+    #     self.date_s = data_train.index[0].date().strftime('%Y-%m-%d')
+    #     self.date_end = data_train.index[-1].date().strftime('%Y-%m-%d')
+    #     self.predict_s = data_test.index[0].date().strftime('%Y-%m-%d')
+    #     self.predict_e = data_test.index[-1].date().strftime('%Y-%m-%d')
+    #     return data_train, data_test
+    def get_train_test_split(self,df):
+        # Filtrer le DataFrame en fonction de la plage de dates spécifiée
+        df_filtered = df.loc[self.date_config["start_date"]:self.date_config["end_date"]]
+        
+        # Calculer l'index pour séparer les données en 80% et 20%
+        split_index = int(len(df_filtered) * 0.8)
+        
+        # Diviser le DataFrame en ensembles d'entraînement et de test
+        df_train = df_filtered.iloc[:split_index]
+        df_test = df_filtered.iloc[split_index:]
+        self.date_s = df_train.index[0].date().strftime('%Y-%m-%d')
+        self.date_end = df_train.index[-1].date().strftime('%Y-%m-%d')
+        self.predict_s = df_test.index[0].date().strftime('%Y-%m-%d')
+        self.predict_e = df_test.index[-1].date().strftime('%Y-%m-%d')
+        return df_train, df_test
     def prepare_data(self, data, is_train=True):
         """
         Prepare the training or testing data by selecting the features and the target variable.

@@ -10,7 +10,6 @@ class DataProcessor:
         path_prices_file = os.path.join(Data_Path, prices_file.get('file_name'))
         self.data = pd.read_csv(path_prices_file, index_col="applicable_date")
         self.data.index = pd.to_datetime(self.data.index, format=prices_file.get('date_format'))
-        self.data = pd.DataFrame(self.data['ROI-DA'])
 
         self.additional_data = []
         for file_info in additional_files[0]:
@@ -31,4 +30,4 @@ class DataProcessor:
             self.df_final = pd.merge(self.df_final, df, left_index=True, right_index=True, how='left')
 
     def get_final_data(self):
-        return self.df_final
+        return self.df_final.sort_index()
