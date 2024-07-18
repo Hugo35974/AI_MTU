@@ -16,21 +16,21 @@ def eval_metrics(y_true,y_pred):
     return MAE
 
 def convert_dates(date_config):
-    start_date = pd.to_datetime(date_config["start_date"]).date()
-    end_date = pd.to_datetime(date_config["end_date"]).date()
-    predict_start_date = pd.to_datetime(date_config["predict_start_date"]).date()
-    predict_end_date = pd.to_datetime(date_config["predict_end_date"]).date()
+    start_date = pd.to_datetime(date_config.date_s).date()
+    end_date = pd.to_datetime(date_config.date_end).date()
+    predict_start_date = pd.to_datetime(date_config.predict_s).date()
+    predict_end_date = pd.to_datetime(date_config.predict_e).date()
     return start_date, end_date, predict_start_date, predict_end_date
-def feature_importance(X, y):
+
+def feature_importance(x, y):
 
     model = RandomForestRegressor()
-    model.fit(X, y)
+    model.fit(x, y)
 
     return model.feature_importances_
 
-
-def pearson_corr(X, y):
-    corr_matrix = np.corrcoef(X, y, rowvar=False)
+def pearson_corr(x, y):
+    corr_matrix = np.corrcoef(x, y, rowvar=False)
     corr_with_target = np.abs(corr_matrix[:-1, -1])  
     return corr_with_target
 
@@ -63,13 +63,11 @@ def shifting(list_toshift: list, df: pd.DataFrame, time_to_shift):
     
     return df
 
-selection_functions = {
+def selectkbest(x_train, y_train, x_test, k, function_name):
+    selection_functions = {
     "f_regression": f_regression,
     "pearson_corr": lambda X, y: (np.abs(np.corrcoef(X.T, y)[-1, :-1]), None),
-}
-
-
-def selectkbest(x_train, y_train, x_test, k, function_name):
+    }
     selector = SelectKBest(score_func=selection_functions[function_name], k=k)
     x_train_k = selector.fit_transform(x_train, y_train)
     x_test_k = selector.transform(x_test)
@@ -135,34 +133,3 @@ def plot_prediction_results(y_true, y_pred, model_name, target, start_date, end_
     plt.tight_layout()
     plt.show()
 
-# def objective(params):
-#         model, duration = RNN_model(x_train, y_train, params)
-#         with torch.no_grad():
-#                 predictions = model(torch.tensor(x_valid, dtype=torch.float32).unsqueeze(1).to(device))
-#                 loss = nn.MSELoss()(predictions, torch.tensor(y_valid, dtype=torch.float32).unsqueeze(1).to(device))
-#         return loss.item()   
-#         x_train, y_train,x_valid,y_valid = modeltrainer.process_data_and_train_model()
-
-
-
-# param_dist = {
-# "hidden_size": sp_randint(10, 100),
-# "num_layers": sp_randint(1, 3),
-# "output_size": [1],  # En général, c'est fixé selon votre problème
-# "num_epochs": sp_randint(100, 500),
-# "learning_rate": sp_uniform(0.0001, 0.01)
-# }
-
-# n_iter_search = 20
-# random_search = ParameterSampler(param_dist, n_iter=n_iter_search, random_state=42)
-
-# best_loss = float('inf')
-# best_params = None
-# for params in random_search:
-#         loss = objective(params)
-#         if loss < best_loss:
-#                 best_loss = loss
-#                 best_params = params
-
-# print("Best parameters found: ", best_params)
-# print("Best validation loss: ", best_loss)
