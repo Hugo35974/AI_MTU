@@ -16,6 +16,7 @@ class ConfigLoader():
         self.model_config = self.extractmodel()
         self.file_imports = self.extractfileimports()
         self.transformations = self.extracttransformations()
+        self.mode = self.extractmode()
 
     def loadconfig(self):
         conf_path = os.path.join(Project_Path,'config.json')
@@ -41,3 +42,5 @@ class ConfigLoader():
     
     def extracttransformations(self):
         return self.config.get('transformations', {})
+    def extractmode(self):
+        return self.config.get('mode',[])
