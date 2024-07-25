@@ -1,4 +1,5 @@
 {
+    "mode":0,
     "date": {
       "start_date": "2020-01-01",
       "end_date": "2020-12-31",
@@ -6,22 +7,27 @@
       "predict_end_date": "2020-04-30"
     },
     "variables": {
+      "features" :[],
       "variables_to_shift": ["elec_prices"],
       "target_variable": "elec_prices",
-      "time_to_shift": [24, 100]
+      "window_lookback(shift)": [1, 100],
+      "horizon": [1,24]
     },
-  "transformations": {
-    "hour": "hour",
-    "day_of_week": "day_of_week",
-    "day_of_year": "day_of_year"
-    },
+    "transformations": {
+      "hour": "hour",
+      "day_of_week": "dayofweek",
+      "day_of_year": "dayofyear",
+      "week_of_year":"weekofyear",
+      "month" : "month"
+      },
+
     "model": {
       "xgb": {
-        "subsample": 0.4,
-        "n_estimators": 100,
-        "max_depth": 3,
-        "learning_rate": 0.0125,
-        "colsample_bytree": 0.4
+        "subsample": 0.1,
+        "n_estimators": 150,
+        "max_depth": 9,
+        "learning_rate": 0.025,
+        "colsample_bytree": 0.5
       },
       "lgb": {
         "num_leaves" : 10,
@@ -43,21 +49,18 @@
     "lstm" : {
       "hidden_size": 83,
       "num_layers": 1,
-      "output_size": 1,
       "num_epochs": 6748,
       "learning_rate": 0.00027
   },
     "gru" : {
       "hidden_size": 63,
       "num_layers": 1,
-      "output_size": 1,
       "num_epochs": 1415,
       "learning_rate": 0.0014
   },
     "rnn" : {
       "hidden_size": 39,
       "num_layers": 1,
-      "output_size": 1,
       "num_epochs": 6864,
       "learning_rate": 0.00027
     }

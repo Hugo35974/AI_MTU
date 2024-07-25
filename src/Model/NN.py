@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from datetime import datetime
-
+import numpy as np
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # device = "cpu"
 class Attention(nn.Module):
@@ -47,10 +47,10 @@ class Model(nn.Module):
         return out
 
 class ModelRun(BaseEstimator, RegressorMixin):
-    def __init__(self, hidden_size=50, num_layers=1, output_size=1, num_epochs=100, learning_rate=0.001):
+    def __init__(self, hidden_size=50, num_layers=1, num_epochs=100, learning_rate=0.001):
         self.hidden_size = hidden_size
         self.num_layers = num_layers
-        self.output_size = output_size
+        self.output_size = None
         self.num_epochs = num_epochs
         self.learning_rate = learning_rate
         self.model = None
@@ -60,8 +60,12 @@ class ModelRun(BaseEstimator, RegressorMixin):
 
     def fit(self, X, y):
         input_size = X.shape[1]
+        # Adjust y shape for consistency
+        if len(y.shape) == 1:
+            y = y[:, np.newaxis]
+        self.output_size = y.shape[1]
         x_train_tensor = torch.tensor(X, dtype=torch.float32).unsqueeze(1).to(device)
-        y_train_tensor = torch.tensor(y, dtype=torch.float32).unsqueeze(1).to(device)
+        y_train_tensor = torch.tensor(y, dtype=torch.float32).to(device)
 
         self._initialize_model(self.model_class, input_size)
 
@@ -73,6 +77,8 @@ class ModelRun(BaseEstimator, RegressorMixin):
         for epoch in range(self.num_epochs):
             self.model.train()
             outputs = self.model(x_train_tensor)
+            outputs = outputs.view(-1, self.output_size)
+            y_train_tensor = y_train_tensor.view(-1, self.output_size) # Adjust shape for consistency
             loss = criterion(outputs, y_train_tensor)
 
             optimizer.zero_grad()
@@ -90,6 +96,11 @@ class ModelRun(BaseEstimator, RegressorMixin):
         x_test_tensor = torch.tensor(X, dtype=torch.float32).unsqueeze(1).to(device)
         with torch.no_grad():
             predictions = self.model(x_test_tensor).cpu().numpy()
+        
+        # Adjust predictions shape for consistency
+        if len(predictions.shape) == 2 and predictions.shape[1] == 1:
+            predictions = predictions.flatten()
+        
         return predictions
 
     def score(self, X, y):
@@ -100,7 +111,6 @@ class ModelRun(BaseEstimator, RegressorMixin):
         return {
             "hidden_size": self.hidden_size,
             "num_layers": self.num_layers,
-            "output_size": self.output_size,
             "num_epochs": self.num_epochs,
             "learning_rate": self.learning_rate
         }
@@ -109,7 +119,6 @@ class ModelRun(BaseEstimator, RegressorMixin):
         for param, value in params.items():
             setattr(self, param, value)
         return self
-
 class LSTM_Model(ModelRun):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
