@@ -131,19 +131,19 @@ regression_models = {
     LSTM_Model.__name__: (LSTM_Model, {
         'model__hidden_size': [50, 100],
         'model__num_layers': [1, 2],
-        'model__num_epochs': [100, 200],
+        'model__num_epochs': [100, 200,1000,10000],
         'model__learning_rate': [0.001, 0.01]
     }),
     GRU_Model.__name__: (GRU_Model, {
         'model__hidden_size': [50, 100],
         'model__num_layers': [1, 2],
-        'model__num_epochs': [100, 200,1000],
+        'model__num_epochs': [100, 200,1000,10000],
         'model__learning_rate': [0.001, 0.01]
     }),
     RNN_Model.__name__: (RNN_Model, {
         'model__hidden_size': [50, 100],
         'model__num_layers': [1, 2],
-        'model__num_epochs': [100, 200],
+        'model__num_epochs': [100, 200,1000,10000],
         'model__learning_rate': [0.001, 0.01]
     })
 }
