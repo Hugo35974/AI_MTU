@@ -36,11 +36,12 @@ class ModelTrainer(ConfigLoader):
         """
         Split the dataframe into training and testing datasets.
         """
-        df = df.loc[self.date_config["start_date"]:self.date_config["end_date"]]
-        split_index = int(0.8 * len(df))
-        df_train = df.iloc[:split_index]
-        df_test = df.iloc[split_index:]
-
+        # df = df.loc[self.date_config["start_date"]:self.date_config["end_date"]]
+        # split_index = int(0.8 * len(df))
+        # df_train = df.iloc[:split_index]
+        # df_test = df.iloc[split_index:]
+        df_train = df.loc[self.date_config["start_date"]:self.date_config["end_date"]]
+        df_test = df.loc[self.date_config["predict_start_date"]:self.date_config["predict_end_date"]]
         self.date_s = df_train.index[0].strftime('%Y-%m-%d')
         self.date_end = df_train.index[-1].strftime('%Y-%m-%d')
         self.predict_s = df_test.index[0].strftime('%Y-%m-%d')

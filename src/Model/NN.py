@@ -5,8 +5,8 @@ import torch.nn as nn
 import torch.optim as optim
 from datetime import datetime
 import numpy as np
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-# device = "cpu"
+# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = "cpu"
 class Attention(nn.Module):
     def __init__(self, hidden_size):
         super(Attention, self).__init__()

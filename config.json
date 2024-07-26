@@ -1,10 +1,10 @@
 {
     "mode":0,
     "date": {
-      "start_date": "2020-01-01",
-      "end_date": "2020-12-31",
-      "predict_start_date": "2020-03-01",
-      "predict_end_date": "2020-04-30"
+      "start_date": "2019-01-01",
+      "end_date": "2020-10-18",
+      "predict_start_date": "2020-09-18",
+      "predict_end_date": "2020-12-30"
     },
     "variables": {
       "features" :[],

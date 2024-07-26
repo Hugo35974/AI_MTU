@@ -178,3 +178,7 @@ def plot_prediction_results(y_true, y_pred, model_name, target, y_train):
 
     plt.show()
 
+    # def shap_lib(self, model, x_train_k, x_test_k):
+    #     explainer = shap.Explainer(model, x_train_k)
+    #     shap_values = explainer(x_test_k)
+    #     shap.summary_plot(shap_values, x_test_k, feature_names=self.modeltrainer.features, plot_type="bar")
