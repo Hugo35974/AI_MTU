@@ -20,7 +20,7 @@ wheels/
 .installed.cfg
 *.egg
 
-
+*.pkl
 *.manifest
 *.spec
 
@@ -108,3 +108,5 @@ dmypy.json
 
 # pytype static type analyzer
 .pytype/
+/data/modelsave
+/data/results
