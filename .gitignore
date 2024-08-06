@@ -20,7 +20,6 @@ wheels/
 .installed.cfg
 *.egg
 
-*.pkl
 *.manifest
 *.spec
 
