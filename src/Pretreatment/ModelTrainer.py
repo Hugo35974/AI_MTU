@@ -1,13 +1,16 @@
-from sklearn.preprocessing import MinMaxScaler
 import os
 import sys
 from pathlib import Path
 
+from sklearn.preprocessing import MinMaxScaler
+
 Project_Path = Path(__file__).parents[2]
 sys.path.append(Project_Path)
 
-from src.Tools.tools import shifting, remove_23rows_hour_col, multi_step, shifting_by_day
 from src.Pretreatment.ConfigLoader import ConfigLoader
+from src.Tools.tools import (multi_step, remove_23rows_hour_col, shifting,
+                             shifting_by_day)
+
 
 class ModelTrainer(ConfigLoader):
     def __init__(self):
@@ -19,7 +22,10 @@ class ModelTrainer(ConfigLoader):
         Apply transformations to the dataframe based on the specified datetime attributes.
         """
         for new_col, datetime_attr in self.transformations.items():
-            df[new_col] = getattr(df.index, datetime_attr)
+            if datetime_attr == 'weekofyear':
+                df[new_col] = df.index.to_series().apply(lambda x: x.isocalendar().week)
+            else:
+                df[new_col] = getattr(df.index, datetime_attr)
         return df
 
     def get_features(self, df):

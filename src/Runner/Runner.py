@@ -1,34 +1,41 @@
+import time
+
+from colorama import Fore, Style, init
+from sklearn.metrics import mean_absolute_error as MAE
+from sklearn.model_selection import (RandomizedSearchCV, cross_val_predict,
+                                     cross_validate)
+from src.Pretreatment.ModelTrainer import ModelTrainer
 from src.Tools.tools import convert_dates, plot_prediction_results
 from tabulate import tabulate
-from src.Pretreatment.ModelTrainer import ModelTrainer
-from sklearn.metrics import mean_absolute_error as MAE
-from sklearn.model_selection import RandomizedSearchCV,  cross_validate,cross_val_predict
-import time
-from colorama import Fore, Style, init
+
 init(autoreset=True)
+import os
+import pickle
 import sys
 from pathlib import Path
-import pandas as pd
-import pickle
-import os
-from joblib import Memory
 
+import pandas as pd
+from joblib import Memory
 from scipy.stats import spearmanr
+
 Project_Path = Path(__file__).parents[2]
 Main_Path = Path(__file__).parents[0]
 sys.path.append(Project_Path)
 Model_Path = os.path.join(Project_Path,'data','modelsave')
 
 import numpy as np
-from sklearn.feature_selection import SelectKBest, f_regression
-from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import StandardScaler, MinMaxScaler, RobustScaler, QuantileTransformer
-from sklearn.multioutput import MultiOutputRegressor
-from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
-from src.Model.ML import regression_models
-from sklearn.ensemble import VotingRegressor,StackingRegressor
-from sklearn.linear_model import LinearRegression
 from sklearn.base import BaseEstimator, RegressorMixin
+from sklearn.ensemble import StackingRegressor, VotingRegressor
+from sklearn.feature_selection import SelectKBest, f_regression
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+from sklearn.multioutput import MultiOutputRegressor
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import (MinMaxScaler, QuantileTransformer,
+                                   RobustScaler, StandardScaler)
+from src.Model.ML import regression_models
+
+
 class Run:
     def __init__(self, models,plot =True):
         self.modeltrainer = ModelTrainer()
@@ -98,7 +105,7 @@ class Run:
                         ('multioutput', MultiOutputRegressor(Pipeline([
                             ('feature_selector', SelectKBest(f_regression)),
                             ('model', model())
-                        ]),n_jobs=12))
+                        ]),n_jobs=-1))
                     ],memory=memory)
 
                     distributions = {
