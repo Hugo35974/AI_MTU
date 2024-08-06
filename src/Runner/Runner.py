@@ -59,7 +59,6 @@ class Run:
                 y_pred = loaded_model.predict(x_test)   
                 # Calculate the MAE
                 mae = MAE(y_true, y_pred)
-
                 results.append(self._prepare_results(model_name, mae, y_true, y_pred, y_train))
             self._print_results(results, ['Model', 'Start-Day-Train', 'End-Day-Train', 'Train-Period', 'Start-Day-Test', 'End-Day-Test', 'Test-Period (days)', 'MAE'])
 
@@ -241,14 +240,36 @@ class Run:
 
         print("Results saved to 'model_results_nn.xlsx'.")
 
-def create_composite_model(Model_Path, x_train, y_train):
+    def run_compo(self):
+        x_train, y_train, x_test, y_test,features,target, config = self.modeltrainer.process_data_and_train_model()
+        create_composite_model(x_train,y_train)
 
+
+
+class CompositeModel:
+    def __init__(self, individual_models):
+        self.individual_models = individual_models
+
+    def fit(self, x_train, y_train):
+        for i, model in enumerate(self.individual_models):
+            # Entraîner chaque modèle avec la sortie correspondante
+            model.fit(x_train, y_train[:, i].reshape(-1, 1))
+
+    def predict(self, x_test):
+        predictions = []
+        for model in self.individual_models:
+            predictions.append(model.predict(x_test))
+        return np.column_stack(predictions)
+    
+def create_composite_model(x_train, y_train):
+    # Charger les résultats des modèles
     results_df = pd.read_csv('model_results.csv')
 
     # Sélection des meilleurs modèles par output
     best_models_per_output = {}
     for i in range(y_train.shape[1]):
-        best_model_info = results_df.loc[results_df[f'R2_T_{i}'].idxmax()]
+        results_df[f"MAE-SRC_T_{i}"] = results_df[f'MAE_T_{i}'] - results_df[f'SRC_T_{i}']
+        best_model_info = results_df.loc[results_df[f"MAE-SRC_T_{i}"].idxmin()]
         best_models_per_output[f'Output_{i}'] = {
             'Model': best_model_info['Model'],
             'Best Parameters': best_model_info['Best Parameters'],
@@ -257,25 +278,20 @@ def create_composite_model(Model_Path, x_train, y_train):
             'SRC': best_model_info[f'SRC_T_{i}']
         }
 
-    # Sauvegarde des meilleurs modèles par output
-    best_models_df = pd.DataFrame(best_models_per_output).T
-    best_models_df.to_csv('best_models_per_output.csv', index=False)
-    best_models_df.to_excel('best_models_per_output.xlsx', index=False)
+    # Création d'une liste pour stocker les modèles
+    individual_models = []
+    for i in range(y_train.shape[1]):
+        model_filename = os.path.join(Model_Path, best_models_per_output[f'Output_{i}']['Model'] + '.pkl')
+        with open(model_filename, 'rb') as file:
+            model = pickle.load(file)
+            individual_models.append(model)
 
-    print("Best models per output saved to 'best_models_per_output.xlsx'.")
-
-    # Création d'un modèle composite à partir des meilleurs modèles par output
-    composite_model = MultiOutputRegressor(estimators=[
-        (f'output_{i}', pickle.load(open(os.path.join(Model_Path, best_models_per_output[f'Output_{i}']['Model'] + '.pkl'), 'rb')))
-        for i in range(y_train.shape[1])
-    ])
-
-    # Entraînement du modèle composite
+    # Création et entraînement du modèle composite
+    composite_model = CompositeModel(individual_models)
     composite_model.fit(x_train, y_train)
 
     # Sauvegarde du modèle composite
-    composite_model_file = os.path.join(Model_Path, 'composite_model.pkl')
-    with open(composite_model_file, 'wb') as model_file:
-        pickle.dump(composite_model, model_file)
+    with open('composite_model.pkl', 'wb') as composite_file:
+        pickle.dump(composite_model, composite_file)
 
     print("Composite model saved to 'composite_model.pkl'.")

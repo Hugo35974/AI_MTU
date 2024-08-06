@@ -3,12 +3,12 @@
     "date": {
       "start_date": "2019-01-01",
       "end_date": "2020-10-18",
-      "predict_start_date": "2020-09-18",
+      "predict_start_date": "2020-10-18",
       "predict_end_date": "2020-12-30"
     },
     "variables": {
       "features" :[],
-      "variables_to_shift": ["elec_prices","daily_natural_gas_prices","daily_oil_price","rain_d","temp_d","wddir_d","wdsp_d","rain_c","temp_c","wddir_c","wdsp_c","rain_g","temp_g","wdsp_g","wddir_g"],
+      "variables_to_shift": ["elec_prices"],
       "target_variable": "elec_prices",
       "window_lookback(shift)": [1, 100],
       "horizon": [1,24]
