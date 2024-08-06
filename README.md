@@ -1,5 +1,7 @@
 # Electricity Price Prediction Project
 
+[![Python Package using Conda](https://github.com/Hugo35974/AI_MTU/actions/workflows/python-package-conda.yml/badge.svg?branch=master)](https://github.com/Hugo35974/AI_MTU/actions/workflows/python-package-conda.yml)
+
 ## Description
 This project focuses on research into predicting electricity prices in Ireland using various machine learning (ML) and natural language processing (NLP) models. The aim is to explore different algorithms and techniques to accurately forecast electricity prices based on historical data.
 
