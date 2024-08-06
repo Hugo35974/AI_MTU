@@ -4,9 +4,10 @@ from colorama import Fore, Style, init
 from sklearn.metrics import mean_absolute_error as MAE
 from sklearn.model_selection import (RandomizedSearchCV, cross_val_predict,
                                      cross_validate)
+from tabulate import tabulate
+
 from src.Pretreatment.ModelTrainer import ModelTrainer
 from src.Tools.tools import convert_dates, plot_prediction_results
-from tabulate import tabulate
 
 init(autoreset=True)
 import os
@@ -33,15 +34,17 @@ from sklearn.multioutput import MultiOutputRegressor
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import (MinMaxScaler, QuantileTransformer,
                                    RobustScaler, StandardScaler)
+
 from src.Model.ML import regression_models
 
 
 class Run:
-    def __init__(self, models,plot =True):
+    def __init__(self, models, plot =False):
         self.modeltrainer = ModelTrainer()
         self.models = models
         self.plot = plot
-    
+        self.model_path = Model_Path
+
     def _prepare_results(self, model_name, mae, y_true, y_pred,y_train):
 
         sd, ed, sdt, edt = convert_dates(self.modeltrainer)
@@ -58,17 +61,17 @@ class Run:
     def run(self):
         results = []
         for model_name in self.models:
-            model = os.path.join(Model_Path,f'{model_name}.pkl')
+            model = os.path.join(self.model_path,f'{model_name}.pkl')
             with open(model, 'rb') as model_file:
                 loaded_model = pickle.load(model_file)
-            for model_name in self.models:
                 x_train, y_train, x_test, y_true, self.features,self.target,self.config= self.modeltrainer.process_data_and_train_model()
                 y_pred = loaded_model.predict(x_test)   
                 # Calculate the MAE
                 mae = MAE(y_true, y_pred)
                 results.append(self._prepare_results(model_name, mae, y_true, y_pred, y_train))
             self._print_results(results, ['Model', 'Start-Day-Train', 'End-Day-Train', 'Train-Period', 'Start-Day-Test', 'End-Day-Test', 'Test-Period (days)', 'MAE'])
-
+        return results
+    
     def build_pipeline(self):
 
         x_train, y_train, x_test, y_test,features,target, config = self.modeltrainer.process_data_and_train_model()
