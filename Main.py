@@ -1,7 +1,7 @@
 from src.Runner.Runner import Run
 
 ml_pipeline = [
-    "BayesianRidge",
+    # "BayesianRidge",
     # "DummyRegressor",
     # "GaussianProcessRegressor",
     # "KernelRidge",
@@ -13,7 +13,7 @@ ml_pipeline = [
     # "RandomForestRegressor",
     # "GradientBoostingRegressor",
     # "LinearRegression",
-    # "Ridge",
+    "Ridge",
     # "Lasso",
     # "ElasticNet",
     # "SVR",
