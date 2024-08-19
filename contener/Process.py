@@ -1,4 +1,5 @@
 import os
+import subprocess
 import sys
 import time
 from datetime import datetime, timedelta, timezone
@@ -22,6 +23,8 @@ class DataCollector:
         self.api_url = "https://thingsboard.tec-gateway.com/unity/timeseries"
         self.api_url_latest = "https://thingsboard.tec-gateway.com/unity/latest"
         self.model_path = os.path.join(Main_path, "composite_model.pkl")
+        self.docker_path = "docker-compose.yml"
+        self.run_docker_compose(['up', '-d'])
         self._init_connection()
         self._create_table()
         self.inject_historical_data()
@@ -40,6 +43,30 @@ class DataCollector:
             except psycopg2.DatabaseError as e:
                 print(f"Database connection error: {e}")
                 sys.exit(1)
+
+    def run_docker_compose(self,command):
+        """
+        Exécute une commande docker-compose.
+
+        :param command: Liste des arguments pour la commande docker-compose.
+        """
+        try:
+            # Exécuter la commande docker-compose
+            result = subprocess.run(
+                ['docker-compose', '-f', self.docker_path] + command,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                check=True
+            )
+
+            # Afficher la sortie standard
+            print(result.stdout)
+
+        except subprocess.CalledProcessError as e:
+            # Afficher les erreurs en cas d'échec
+            print(f"Erreur lors de l'exécution de la commande: {e.stderr}")
+
 
     def _close_connection(self):
         if self.connection is not None and not self.connection.closed:
