@@ -1,12 +1,16 @@
-from pathlib import Path
-import os
 import json
+import os
 import sys
+from pathlib import Path
 
 Project_Path = Path(__file__).parents[2]
+Main_Path = Path(__file__).parents[0]
+
 sys.path.append(Project_Path)
+sys.path.append(Main_Path)
 
 from src.Pretreatment.DataProcessor import DataProcessor
+
 
 class ConfigLoader():
     def __init__(self):
@@ -17,6 +21,7 @@ class ConfigLoader():
         self.file_imports = self.extractfileimports()
         self.transformations = self.extracttransformations()
         self.mode = self.extractmode()
+        self.bdd = self.extractBddSetting()
 
     def loadconfig(self):
         conf_path = os.path.join(Project_Path,'config.json')
@@ -42,5 +47,9 @@ class ConfigLoader():
     
     def extracttransformations(self):
         return self.config.get('transformations', {})
+    
     def extractmode(self):
         return self.config.get('mode',[])
+    
+    def extractBddSetting(self):
+        return self.config.get('bdd',[])
