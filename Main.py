@@ -1,3 +1,7 @@
+import time
+from datetime import datetime, timedelta, timezone
+
+from contener.Process import DataCollector
 from src.Runner.Runner import Run
 
 ml_pipeline = [
@@ -21,8 +25,8 @@ ml_pipeline = [
     # "MLPRegressor"
 ]
 
-runner_ml = Run(ml_pipeline, plot = True)
-runner_ml.build_pipeline()
+# runner_ml = Run(ml_pipeline, plot = True)
+# runner_ml.build_pipeline()
 
 # dl_functions = [
 #     "LSTM_Model",
@@ -43,3 +47,6 @@ runner_ml.build_pipeline()
 # model = ["composite_model"]
 # runner_dl = Run(model, plot = True)
 # runner_dl.run()
+
+data_collector = DataCollector()
+data_collector.run()

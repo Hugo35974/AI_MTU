@@ -4,7 +4,7 @@ from pathlib import Path
 
 from sklearn.preprocessing import MinMaxScaler
 
-Project_Path = Path(__file__).parents[2]
+Project_Path = Path(__file__).parents[1]
 sys.path.append(Project_Path)
 
 from src.Pretreatment.ConfigLoader import ConfigLoader
