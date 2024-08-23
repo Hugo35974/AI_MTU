@@ -36,9 +36,12 @@ from src.Model.ML import regression_models
 
 
 class Run:
-    def __init__(self, plot =False):
+    def __init__(self, models = None,plot =False):
         self.modeltrainer = ModelTrainer()
-        self.models = self.modeltrainer.models
+        if models :
+            self.models = models
+        else:
+            self.modeltrainer.models
         self.plot = plot
         self.model_path = Model_Path
 
