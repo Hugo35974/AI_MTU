@@ -1,12 +1,14 @@
 {
     "bdd":{
-      "postgre" : {
         "dbname" : "mtu_elec",
         "user" : "root",
         "password" : "root",
         "host" : "localhost",
         "port" : "5432"
-      }
+    },
+    "api":{
+        "api_url" : "https://thingsboard.tec-gateway.com/unity/timeseries",
+        "api_url_latest" : "https://thingsboard.tec-gateway.com/unity/latest"
     },
     "mode":0,
     "date": {
@@ -20,7 +22,8 @@
       "variables_to_shift": ["elec_prices"],
       "target_variable": "elec_prices",
       "window_lookback(shift)": [1, 100],
-      "horizon": [1,24]
+      "horizon": [1,24],
+      "hour": 21
     },
     "transformations": {
       "hour": "hour",
@@ -29,57 +32,22 @@
       "week_of_year":"weekofyear",
       "month" : "month"
       },
-
-    "model": {
-      "xgb": {
-        "subsample": 0.1,
-        "n_estimators": 150,
-        "max_depth": 9,
-        "learning_rate": 0.025,
-        "colsample_bytree": 0.5
-      },
-      "lgb": {
-        "num_leaves" : 10,
-        "min_child_samples" : 60,
-        "learning_rate" : 0.0125,
-        "n_estimators" : 200,
-        "max_depth": 3,
-        "subsample": 0.1,
-        "colsample_bytree" : 0.4
-      },
-      "rfr" : {
-        "n_estimators": 400,         
-        "max_depth": 30,            
-        "min_samples_split": 7,      
-        "min_samples_leaf": 9,     
-        "max_features": "sqrt",      
-        "bootstrap": true           
-    },
-    "lstm" : {
-      "hidden_size": 83,
-      "num_layers": 1,
-      "num_epochs": 6748,
-      "learning_rate": 0.00027
-  },
-    "gru" : {
-      "hidden_size": 63,
-      "num_layers": 1,
-      "num_epochs": 1415,
-      "learning_rate": 0.0014
-  },
-    "rnn" : {
-      "hidden_size": 39,
-      "num_layers": 1,
-      "num_epochs": 6864,
-      "learning_rate": 0.00027
-    }
-
-  
-    },
+    "model" : [
+      "BayesianRidge",
+      "PassiveAggressiveRegressor",
+      "SGDRegressor",
+      "XGBRegressor",
+      "LinearRegression",
+      "Ridge",
+      "Lasso",
+      "ElasticNet",
+      "SVR",
+      "MLPRegressor"
+    ],
     "file_imports": {
       "files": [
         {
-          "file_name": "data_final_2019_2020.csv",
+          "file_name": "data_api.csv",
           "date_format": "%Y-%m-%d %H:%M:%S"
         }
       ]
