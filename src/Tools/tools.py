@@ -9,13 +9,20 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.feature_selection import SelectKBest, f_regression
 from joblib import Parallel, delayed
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+import pickle
+from scipy.stats import spearmanr
+from sklearn.model_selection import RandomizedSearchCV, cross_validate, cross_val_predict
+import time
+from sklearn.pipeline import Pipeline
+from sklearn.multioutput import MultiOutputRegressor
+
+Project_Path = Path(__file__).parents[1]
 
 def mase(y_true, y_pred, y_train):
     n = len(y_train)
     d = np.abs(np.diff(y_train)).sum() / (n-1)
     errors = np.abs(y_true - y_pred)
     return errors.mean() / d
-Project_Path = Path(__file__).parents[1]
 
 def eval_metrics(y_true,y_pred):
     MAE = mean_absolute_error(y_true,y_pred)
@@ -122,11 +129,11 @@ def multi_step(data, target, horizon):
         namelist.append(name)
     return data, namelist
 
-def remove_23rows_hour_col(data):
+def remove_rows_hour_col(data,hour):
     """
     Remove rows where the hour is 23 and drop the 'hour' column.
     """
-    data = data[data['hour'] == 23]
+    data = data[data['hour'] == hour]
     data = data.drop(['hour'], axis=1)
     data = data.reset_index(drop=True)
     return data
@@ -182,3 +189,78 @@ def plot_prediction_results(y_true, y_pred, model_name, target, y_train):
     #     explainer = shap.Explainer(model, x_train_k)
     #     shap_values = explainer(x_test_k)
     #     shap.summary_plot(shap_values, x_test_k, feature_names=self.modeltrainer.features, plot_type="bar")
+
+def setup_pipeline_single_output(scaler, model, model_space, x_train):
+
+    pipeline = Pipeline([
+        ('scaler', scaler),
+        ('feature_selector', SelectKBest(f_regression)),
+        ('model', model()),
+    ],n_jobs=-1)
+    distributions = {**model_space, 'feature_selector__k': list(range(0, x_train.shape[1]))}
+    return pipeline, distributions
+
+def setup_pipeline_multi_output(scaler, model, model_space_multi, x_train):
+
+    pipeline = Pipeline([
+        ('scaler', scaler),
+        ('multioutput', MultiOutputRegressor(Pipeline([
+            ('feature_selector', SelectKBest(f_regression)),
+            ('model', model())
+        ]), n_jobs=-1))
+    ])
+    distributions = {**model_space_multi, 'multioutput__estimator__feature_selector__k': list(range(0, x_train.shape[1]))}
+    return pipeline, distributions
+
+def train_and_search(pipeline, distributions, x_train, y_train_ravel):
+    clf = RandomizedSearchCV(pipeline, distributions, n_iter=10, cv=5, verbose=1, n_jobs=-1)
+    start_time = time.time()
+    search = clf.fit(x_train, y_train_ravel)
+    duration = time.time() - start_time
+    return search, duration
+
+def evaluate_model(search, x_train, y_train_ravel, y_test_ravel, model_name, scaler, features, target, config, duration):
+    cv_results = cross_validate(search.best_estimator_, x_train, y_train_ravel, cv=5, scoring='neg_mean_squared_error', return_train_score=True)
+    y_pred = cross_val_predict(search.best_estimator_, x_train, y_train_ravel, cv=5)
+
+    spearman_per_dimension = [spearmanr(y_train_ravel[:, i], y_pred[:, i])[0] for i in range(y_train_ravel.shape[1])]
+    r2_per_dimension = [r2_score(y_train_ravel[:, i], y_pred[:, i]) for i in range(y_train_ravel.shape[1])]
+    mae_per_dimension = np.mean(np.abs(y_train_ravel - y_pred), axis=0)
+
+    MAE = np.mean(mae_per_dimension)
+    R2 = np.mean(r2_per_dimension)
+    SRC = np.mean(spearman_per_dimension)
+
+    result = {
+        'Model': model_name + '_' + scaler.__class__.__name__,
+        'Best Parameters': search.best_params_,
+        'Mean CV Train Score': cv_results['train_score'].mean(),
+        'Mean CV Test Score': cv_results['test_score'].mean(),
+        'R2_Mean': R2,
+        'MAE_Mean': MAE,
+        'SRC_Mean': SRC,
+        'X_Features': features,
+        'Y_Target': target,
+        'Start_date': config.get('date')['start_date'],
+        'End_date': config.get('date')['end_date'],
+        'Lookback': config.get('variables')['window_lookback(shift)'],
+        'Horizon': config.get('variables')['horizon'],
+        'Mode': config.get('mode'),
+        'Duration (seconds)': duration
+    }
+
+    # Add MAE, R2, SRC for each dimension as separate columns
+    for i in range(len(mae_per_dimension)):
+        result[f'MAE_T_{i}'] = mae_per_dimension[i]
+    for i in range(len(r2_per_dimension)):
+        result[f'R2_T_{i}'] = r2_per_dimension[i]
+    for i in range(len(spearman_per_dimension)):
+        result[f'SRC_T_{i}'] = spearman_per_dimension[i]
+
+    return result
+
+def save_best_model(best_model, model_name, scaler,modelpath):
+    file = os.path.join(modelpath, f'{model_name}_{scaler.__class__.__name__}.pkl')
+    with open(file, 'wb') as model_file:
+        pickle.dump(best_model, model_file)
+    print(f"Model saved: {file}")

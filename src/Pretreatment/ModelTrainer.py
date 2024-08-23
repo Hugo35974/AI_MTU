@@ -1,21 +1,19 @@
-import os
 import sys
+import pandas as pd
 from pathlib import Path
-
-from sklearn.preprocessing import MinMaxScaler
 
 Project_Path = Path(__file__).parents[1]
 sys.path.append(Project_Path)
 
 from src.Pretreatment.ConfigLoader import ConfigLoader
-from src.Tools.tools import (multi_step, remove_23rows_hour_col, shifting,
+from src.Tools.tools import (multi_step, remove_rows_hour_col, shifting,
                              shifting_by_day)
-
 
 class ModelTrainer(ConfigLoader):
     def __init__(self):
         super().__init__()
         self.features = None
+        self.df = None
 
     def apply_transformations(self, df):
         """
@@ -43,11 +41,11 @@ class ModelTrainer(ConfigLoader):
         Split the dataframe into training and testing datasets.
         """
         # df = df.loc[self.date_config["start_date"]:self.date_config["end_date"]]
-        # split_index = int(0.8 * len(df))
-        # df_train = df.iloc[:split_index]
-        # df_test = df.iloc[split_index:]
-        df_train = df.loc[self.date_config["start_date"]:self.date_config["end_date"]]
-        df_test = df.loc[self.date_config["predict_start_date"]:self.date_config["predict_end_date"]]
+        split_index = int(0.8 * len(df))
+        df_train = df.iloc[:split_index]
+        df_test = df.iloc[split_index:]
+        # df_train = df.loc[self.date_config["start_date"]:self.date_config["end_date"]]
+        # df_test = df.loc[self.date_config["predict_start_date"]:self.date_config["predict_end_date"]]
         self.date_s = df_train.index[0].strftime('%Y-%m-%d')
         self.date_end = df_train.index[-1].strftime('%Y-%m-%d')
         self.predict_s = df_test.index[0].strftime('%Y-%m-%d')
@@ -72,13 +70,31 @@ class ModelTrainer(ConfigLoader):
         df_final = self.launchdataprocessor()
         df_final = self.apply_transformations(df_final)
         return df_final
+    
+    def get_data_from_api(self, df):
+        """
+        Launch the data processor and apply transformations to get the final dataframe.
+        """
+        # Créer le DataFrame et définir l'index sur 'applicable_date'
+        df = pd.DataFrame(df, columns=['applicable_date', 'elec_prices'])
+        df.set_index('applicable_date', inplace=True)
+        
+        # Convertir l'index en datetime
+        df.index = pd.to_datetime(df.index, format='%Y-%m-%d %H:%M:%S')
+        df = df.sort_index()
+        # Appliquer les transformations et retourner le DataFrame final
+        df_final = self.apply_transformations(df)
+        return df_final
 
-    def process_data_and_train_model(self):
+    def process_data_and_train_model(self,df= None,hour =21):
         """
         Process the data and train the model, returning the scaled training and testing data.
         """
         # Get the final processed dataframe
-        df_final = self.get_final_df()
+        if df:
+            df_final = self.get_data_from_api(df)
+        else: 
+            df_final = self.get_final_df()
 
         # Add more columns for machine learning
         df_final['expanding_window_price'] = df_final['elec_prices'].expanding().mean()
@@ -88,9 +104,10 @@ class ModelTrainer(ConfigLoader):
         # Split the datasest in train & test set
         data_train, data_test = self.get_train_test_split(df_final.dropna())
         
+
         if self.mode == 0 :
-            data_train = remove_23rows_hour_col(data_train)
-            data_test = remove_23rows_hour_col(data_test)
+            data_train = remove_rows_hour_col(data_train,hour)
+            data_test = remove_rows_hour_col(data_test,hour)
 
         self.target = [self.variables_config["target_variable"]] + namelist
         self.features = self.get_features(df_final)

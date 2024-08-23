@@ -5,9 +5,10 @@ from sklearn.metrics import mean_absolute_error as MAE
 from sklearn.model_selection import (RandomizedSearchCV, cross_val_predict,
                                      cross_validate)
 from tabulate import tabulate
-
+from src.Model.CompositeModel import CompositeModel
 from src.Pretreatment.ModelTrainer import ModelTrainer
-from src.Tools.tools import convert_dates, plot_prediction_results
+from src.Tools.tools import (convert_dates, plot_prediction_results,setup_pipeline_single_output,
+                            setup_pipeline_multi_output,train_and_search,evaluate_model,save_best_model)
 
 init(autoreset=True)
 import os
@@ -16,21 +17,17 @@ import sys
 from pathlib import Path
 
 import pandas as pd
-from joblib import Memory
 from scipy.stats import spearmanr
 
 Project_Path = Path(__file__).parents[2]
 Main_Path = Path(__file__).parents[0]
 sys.path.append(Project_Path)
 Model_Path = os.path.join(Project_Path,'data','modelsave')
+Contener_Path = os.path.join(Project_Path,'contener')
+model_composite_path = os.path.join(Contener_Path,'composite_model.pkl')
 
 import numpy as np
-from sklearn.base import BaseEstimator, RegressorMixin
-from sklearn.ensemble import StackingRegressor, VotingRegressor
-from sklearn.feature_selection import SelectKBest, f_regression
-from sklearn.linear_model import LinearRegression
-from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
-from sklearn.multioutput import MultiOutputRegressor
+from sklearn.metrics import r2_score
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import (MinMaxScaler, QuantileTransformer,
                                    RobustScaler, StandardScaler)
@@ -39,9 +36,9 @@ from src.Model.ML import regression_models
 
 
 class Run:
-    def __init__(self, models, plot =False):
+    def __init__(self, plot =False):
         self.modeltrainer = ModelTrainer()
-        self.models = models
+        self.models = self.modeltrainer.models
         self.plot = plot
         self.model_path = Model_Path
 
@@ -49,8 +46,6 @@ class Run:
 
         sd, ed, sdt, edt = convert_dates(self.modeltrainer)
         result = [model_name, sd, ed, (ed - sd).days, sdt, edt, (edt - sdt).days, mae]
-        if self.plot:
-            plot_prediction_results(y_true, y_pred, model_name, self.modeltrainer.variables_config["target_variable"],y_train)
         return result
 
     def _print_results(self, results, headers):
@@ -70,119 +65,47 @@ class Run:
                 mae = MAE(y_true, y_pred)
                 results.append(self._prepare_results(model_name, mae, y_true, y_pred, y_train))
             self._print_results(results, ['Model', 'Start-Day-Train', 'End-Day-Train', 'Train-Period', 'Start-Day-Test', 'End-Day-Test', 'Test-Period (days)', 'MAE'])
-        return results
+        return results  
     
-    def build_pipeline(self):
-
-        x_train, y_train, x_test, y_test,features,target, config = self.modeltrainer.process_data_and_train_model()
+    def build_pipeline(self, df = None):
+        # Préparation des données et des modèles
+        x_train, y_train, x_test, y_test, features, target, config = self.modeltrainer.process_data_and_train_model(df)
         scalers = [StandardScaler(), MinMaxScaler(), RobustScaler(), QuantileTransformer()]
         results = []
-        cachedir = os.path.join(Model_Path,'cachedir')
-        memory = Memory(location=cachedir, verbose=0)
+
         for model_name in self.models:
             model, model_space = regression_models[model_name]
             model_space_multi = {f'multioutput__estimator__{key}': value for key, value in model_space.items()}
+
             for scaler in scalers:
                 print(f"Model : {model_name} -> Scaler : {scaler} ")
-                
-                if len(y_train.shape) == 1: 
-                    feature_selector_space = {'feature_selector__k': list(range(0,x_train.shape[1]))}
-                    y_train_ravel = np.ravel(y_train)
-                    y_test_ravel = np.ravel(y_test)
-                    pipeline = Pipeline([
-                        ('scaler', scaler),
-                        ('feature_selector', SelectKBest(f_regression)),
-                        ('model', model()),
-                    ])
-                    distributions = {
-                        **model_space,
-                        **feature_selector_space,
-                    }
-                
+
+                if len(y_train.shape) == 1:
+                    pipeline, distributions = setup_pipeline_single_output(
+                        scaler, model, model_space, x_train
+                    )
+                    y_train = np.ravel(y_train)
+                    y_test = np.ravel(y_test)
                 else:
-                    y_train_ravel = y_train
-                    y_test_ravel = y_test
-                    feature_selector_space = {'multioutput__estimator__feature_selector__k': list(range(0,x_train.shape[1]))}
-                    pipeline = Pipeline([
-                        ('scaler', scaler),
-                        ('multioutput', MultiOutputRegressor(Pipeline([
-                            ('feature_selector', SelectKBest(f_regression)),
-                            ('model', model())
-                        ]),n_jobs=-1))
-                    ],memory=memory)
+                    pipeline, distributions = setup_pipeline_multi_output(
+                        scaler, model, model_space_multi, x_train
+                    )
 
-                    distributions = {
-                        **model_space_multi,
-                        **feature_selector_space,
-                    }
-                
-                clf = RandomizedSearchCV(pipeline, distributions, n_iter=10, cv=5, verbose=1, n_jobs=-1)
-                start_time = time.time()
-                
-                search = clf.fit(x_train, y_train_ravel)
-                
-                # Calculer la durée de l'entraînement
-                duration = time.time() - start_time
+                # Recherche des meilleurs hyperparamètres et entraînement
+                search, duration = train_and_search(pipeline, distributions, x_train, y_train)
 
-                # Cross-validation results
-                cv_results = cross_validate(search.best_estimator_, x_train, y_train_ravel, cv=5, scoring='neg_mean_squared_error', return_train_score=True)
-                y_pred = cross_val_predict(search.best_estimator_, x_train, y_train_ravel, cv=5)
-                spearman_per_dimension = [spearmanr(y_train_ravel[:, i], y_pred[:, i])[0] for i in range(y_train_ravel.shape[1])]
-
-                r2_per_dimension = [r2_score(y_train_ravel[:, i], y_pred[:, i]) for i in range(y_train_ravel.shape[1])]
-                mae_per_dimension = np.mean(np.abs(y_train_ravel - y_pred), axis=0)
-                MAE = np.mean(mae_per_dimension)
-                R2 = np.mean(r2_per_dimension)
-                SRC = np.mean(spearman_per_dimension)
-                # Append results to the list
-                result = {
-                    'Model':  model_name + '_' + scaler.__class__.__name__,
-                    'Best Parameters': search.best_params_,
-                    'Mean CV Train Score': cv_results['train_score'].mean(),
-                    'Mean CV Test Score': cv_results['test_score'].mean(),
-                    'R2_Mean': R2,
-                    'MAE_Mean': MAE,
-                    'SRC_Mean': SRC,
-                    'X_Features': features,
-                    'Y_Target': target,
-                    'Start_date': config.get('date')['start_date'],
-                    'End_date': config.get('date')['end_date'],
-                    'Lookback': config.get('variables')['window_lookback(shift)'],
-                    'Horizon': config.get('variables')['horizon'],
-                    'Mode': config.get('mode'),
-                    'Duration (seconds)': duration
-                }
-
-                # Add MAE for each dimension as separate columns
-                for i in range(len(mae_per_dimension)):
-                    result[f'MAE_T_{i}'] = mae_per_dimension[i]
-
-                for i in range(len(r2_per_dimension)):
-                    result[f'R2_T_{i}'] = r2_per_dimension[i]
-
-                for i in range(len(spearman_per_dimension)):
-                    result[f'SRC_T_{i}'] = spearman_per_dimension[i]
-
+                # Évaluation du modèle
+                result = evaluate_model(
+                    search, x_train, y_train, y_test, model_name, scaler, features, target, config, duration
+                )
                 results.append(result)
 
-                print(f'Scaler: {scaler.__class__.__name__}')
-                print('Training scores:', search.cv_results_['mean_test_score'].mean())
-                print('Best parameters:', search.best_params_)
+                # Sauvegarde du modèle
+                save_best_model(search.best_estimator_, model_name, scaler,Model_Path)
 
-                best_model = search.best_estimator_
-                file = os.path.join(Model_Path,f'{model_name}_{scaler.__class__.__name__}.pkl')
+        self.create_composite_model(x_train,y_train,x_test,y_test)
 
-                with open(file, 'wb') as model_file:
-                    pickle.dump(best_model, model_file)
 
-        results_df = pd.DataFrame(results)
-        results_df.to_csv('model_results.csv', index=False)
-        results_df.to_excel('model_results.xlsx', index=False)
-
-        print("Results saved to 'model_results.xlsx'.")
-     
-          
-    
     def build_nn_pipeline(self):
         x_train, y_train, x_test, y_test,features,target, config = self.modeltrainer.process_data_and_train_model()
         scalers = [StandardScaler(), MinMaxScaler(), RobustScaler(), QuantileTransformer()]
@@ -250,58 +173,43 @@ class Run:
 
         print("Results saved to 'model_results_nn.xlsx'.")
 
-    def run_compo(self):
-        x_train, y_train, x_test, y_test,features,target, config = self.modeltrainer.process_data_and_train_model()
-        create_composite_model(x_train,y_train)
+    def create_composite_model(self,x_train, y_train, x_test, y_test):
+        # Charger les résultats des modèles
+        results_df = pd.read_csv('model_results.csv')
 
+        # Sélection des meilleurs modèles par output
+        best_models_per_output = {}
+        for i in range(y_train.shape[1]):
+            results_df[f"MAE-SRC_T_{i}"] = results_df[f'MAE_T_{i}'] - results_df[f'SRC_T_{i}']
+            best_model_info = results_df.loc[results_df[f"MAE-SRC_T_{i}"].idxmin()]
+            best_models_per_output[f'Output_{i}'] = {
+                'Model': best_model_info['Model'],
+                'Best Parameters': best_model_info['Best Parameters'],
+                'R2': best_model_info[f'R2_T_{i}'],
+                'MAE': best_model_info[f'MAE_T_{i}'],
+                'SRC': best_model_info[f'SRC_T_{i}']
+            }
 
+        best_models_df = pd.DataFrame(best_models_per_output).T 
+        best_models_df.to_csv('best_models_per_output.csv', index=False)
 
-class CompositeModel:
-    def __init__(self, individual_models):
-        self.individual_models = individual_models
+        # Création d'une liste pour stocker les modèles
+        individual_models = []
+        for i in range(y_train.shape[1]):
+            model_filename = os.path.join(Model_Path, best_models_per_output[f'Output_{i}']['Model'] + '.pkl')
+            with open(model_filename, 'rb') as file:
+                model = pickle.load(file)
+                individual_models.append(model)
 
-    def fit(self, x_train, y_train):
-        for i, model in enumerate(self.individual_models):
-            # Entraîner chaque modèle avec la sortie correspondante
-            model.fit(x_train, y_train[:, i].reshape(-1, 1))
+        # Création et entraînement du modèle composite
+        composite_model = CompositeModel(individual_models)
+        composite_model.fit(x_train, y_train)
 
-    def predict(self, x_test):
-        predictions = []
-        for model in self.individual_models:
-            predictions.append(model.predict(x_test))
-        return np.column_stack(predictions)
-    
-def create_composite_model(x_train, y_train):
-    # Charger les résultats des modèles
-    results_df = pd.read_csv('model_results.csv')
+        if self.plot:
+            y_pred = composite_model.predict(x_test)
+            plot_prediction_results(y_test, y_pred, "composite_model", self.modeltrainer.variables_config["target_variable"],y_train)
 
-    # Sélection des meilleurs modèles par output
-    best_models_per_output = {}
-    for i in range(y_train.shape[1]):
-        results_df[f"MAE-SRC_T_{i}"] = results_df[f'MAE_T_{i}'] - results_df[f'SRC_T_{i}']
-        best_model_info = results_df.loc[results_df[f"MAE-SRC_T_{i}"].idxmin()]
-        best_models_per_output[f'Output_{i}'] = {
-            'Model': best_model_info['Model'],
-            'Best Parameters': best_model_info['Best Parameters'],
-            'R2': best_model_info[f'R2_T_{i}'],
-            'MAE': best_model_info[f'MAE_T_{i}'],
-            'SRC': best_model_info[f'SRC_T_{i}']
-        }
+        with open(model_composite_path, 'wb') as composite_file:
+            pickle.dump(composite_model, composite_file)
 
-    # Création d'une liste pour stocker les modèles
-    individual_models = []
-    for i in range(y_train.shape[1]):
-        model_filename = os.path.join(Model_Path, best_models_per_output[f'Output_{i}']['Model'] + '.pkl')
-        with open(model_filename, 'rb') as file:
-            model = pickle.load(file)
-            individual_models.append(model)
-
-    # Création et entraînement du modèle composite
-    composite_model = CompositeModel(individual_models)
-    composite_model.fit(x_train, y_train)
-
-    # Sauvegarde du modèle composite
-    with open('composite_model.pkl', 'wb') as composite_file:
-        pickle.dump(composite_model, composite_file)
-
-    print("Composite model saved to 'composite_model.pkl'.")
+        print(f"Composite model saved to {model_composite_path}.")
