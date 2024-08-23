@@ -40,12 +40,9 @@ class ModelTrainer(ConfigLoader):
         """
         Split the dataframe into training and testing datasets.
         """
-        # df = df.loc[self.date_config["start_date"]:self.date_config["end_date"]]
         split_index = int(0.8 * len(df))
         df_train = df.iloc[:split_index]
         df_test = df.iloc[split_index:]
-        # df_train = df.loc[self.date_config["start_date"]:self.date_config["end_date"]]
-        # df_test = df.loc[self.date_config["predict_start_date"]:self.date_config["predict_end_date"]]
         self.date_s = df_train.index[0].strftime('%Y-%m-%d')
         self.date_end = df_train.index[-1].strftime('%Y-%m-%d')
         self.predict_s = df_test.index[0].strftime('%Y-%m-%d')
@@ -86,7 +83,7 @@ class ModelTrainer(ConfigLoader):
         df_final = self.apply_transformations(df)
         return df_final
 
-    def process_data_and_train_model(self,df= None,hour =21):
+    def process_data_and_train_model(self,df= None):
         """
         Process the data and train the model, returning the scaled training and testing data.
         """
@@ -106,8 +103,8 @@ class ModelTrainer(ConfigLoader):
         
 
         if self.mode == 0 :
-            data_train = remove_rows_hour_col(data_train,hour)
-            data_test = remove_rows_hour_col(data_test,hour)
+            data_train = remove_rows_hour_col(data_train,self.variables_config["hour"])
+            data_test = remove_rows_hour_col(data_test,self.variables_config["hour"])
 
         self.target = [self.variables_config["target_variable"]] + namelist
         self.features = self.get_features(df_final)

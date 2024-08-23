@@ -41,7 +41,7 @@ class Run:
         if models :
             self.models = models
         else:
-            self.modeltrainer.models
+            self.models = self.modeltrainer.models
         self.plot = plot
         self.model_path = Model_Path
 
