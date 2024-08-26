@@ -69,7 +69,7 @@ class DataCollector:
             'endTs': end_ts
         }
         response = requests.get(self.api_url, params=params)
-        if response.json()["status"] == 200:
+        if response.status_code == 200:
             return response.json()
         else:
             print(f"Failed to fetch data: {response.status_code}")
@@ -95,21 +95,24 @@ class DataCollector:
         return timestamp_ms
 
     def inject_historical_data(self):
-        latest_data = self._fetch_latest_data_API()
-        if latest_data:
+        try:
+            latest_data = self._fetch_latest_data_API()
+
             start_ts = self.date_to_timestamp("2014/01/01")
             end_ts = int(latest_data.timestamp() * 1000)  # End at the latest time available
 
-        data = self._fetch_data(start_ts, end_ts)
-        if data:
+            data = self._fetch_data(start_ts, end_ts)
             df = pd.DataFrame(data['price'], columns=['ts', 'value'])
             df['time'] = pd.to_datetime(df['ts'], unit='ms', utc=True)
             df['elec_prices'] = None  # Initialize the prediction column
             self._upsert_data(df)
-        else:
-            df = pd.read_csv(os.path.join(Timeseries_path,"data_api.csv"))
-            df = df.rename(columns={"elec_prices": "value", "applicable_date" : "time"})
-            df["time"] = pd.to_datetime(df["time"])
+        except Exception as e:  # Catch specific exceptions if possible
+            print(f"An error occurred: {e}")
+            
+            csv_path = os.path.join(Timeseries_path, "data_api.csv")
+            df = pd.read_csv(csv_path)
+            df = df.rename(columns={"elec_prices": "value", "applicable_date": "time"})
+            df['time'] = pd.to_datetime(df['time'])
             df = df.fillna(0)
             df['elec_prices'] = None
             self._upsert_data(df)
