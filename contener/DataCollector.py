@@ -30,7 +30,7 @@ class DataCollector:
         self._init_connection()
         self._create_table()
         self.inject_historical_data()
-        self._retrain_model()
+        # self._retrain_model()
         self._predict_historical_data()
 
     def _init_connection(self):
@@ -99,14 +99,17 @@ class DataCollector:
             latest_data = self._fetch_latest_data_API()
 
             start_ts = self.date_to_timestamp("2014/01/01")
-            end_ts = int(latest_data.timestamp() * 1000)  # End at the latest time available
+            end_ts = int(latest_data.timestamp() * 1000) 
 
             data = self._fetch_data(start_ts, end_ts)
             df = pd.DataFrame(data['price'], columns=['ts', 'value'])
             df['time'] = pd.to_datetime(df['ts'], unit='ms', utc=True)
-            df['elec_prices'] = None  # Initialize the prediction column
+            df['elec_prices'] = None  
             self._upsert_data(df)
-        except Exception as e:  # Catch specific exceptions if possible
+            print("-------------------------------")
+            print("Extracting API Data with sucess")
+            print("-------------------------------")
+        except Exception as e:  
             print(f"An error occurred: {e}")
             
             csv_path = os.path.join(Timeseries_path, "data_api.csv")
@@ -116,6 +119,9 @@ class DataCollector:
             df = df.fillna(0)
             df['elec_prices'] = None
             self._upsert_data(df)
+            print("-------------------------------")
+            print("Extracting Data CSV with sucess")
+            print("-------------------------------")
 
 
     def _get_last_100_hours(self, up_to_time=None):
