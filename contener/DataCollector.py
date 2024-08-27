@@ -11,7 +11,6 @@ import psycopg2
 import requests
 from joblib import dump, load
 from psycopg2 import sql
-
 from src.Pretreatment.ConfigLoader import ConfigLoader
 from src.Runner.Runner import Run
 
@@ -82,9 +81,8 @@ class DataCollector:
                     INSERT INTO sensor_data (time, elec_prices_metric, elec_prices)
                     VALUES (%s, %s, %s)
                     ON CONFLICT (time)
-                    DO UPDATE SET 
-                        elec_prices_metric = COALESCE(sensor_data.elec_prices_metric, EXCLUDED.elec_prices_metric),
-                        elec_prices = COALESCE(sensor_data.elec_prices, EXCLUDED.elec_prices);
+                    DO UPDATE SET
+                        elec_prices = EXCLUDED.elec_prices;
                 """, (row['time'], row['value'], row['elec_prices']))
         self.connection.commit()
 
@@ -194,7 +192,7 @@ class DataCollector:
         current_time = self._fetch_first_data() + timedelta(hours=102)
         current_time = current_time.replace(hour=latest_time.hour, minute=latest_time.minute, second=latest_time.second)
 
-        while current_time <= latest_time:
+        while current_time <= (latest_time - timedelta(hours=24)):
             last_100_hours, _ = self._get_last_100_hours(up_to_time=current_time)
             if last_100_hours is not None:
                 predictions_df = self._predict_next_24_hours(last_100_hours, current_time)
