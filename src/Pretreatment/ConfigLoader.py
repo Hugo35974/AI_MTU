@@ -24,6 +24,7 @@ class ConfigLoader():
         self.bdd = self.extractBddSetting()
         self.models = self.extractModel()
         self.api = self.extractAPI()
+        self.model_infos = self.extrat_model_infos()
 
     def loadconfig(self):
         conf_path = os.path.join(Project_Path,'config.json')
@@ -61,3 +62,6 @@ class ConfigLoader():
     
     def extractAPI(self):
         return self.config.get('api',[])
+    
+    def extrat_model_infos(self):
+        return self.config.get('models_infos',[])

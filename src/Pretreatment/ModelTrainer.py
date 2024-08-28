@@ -1,6 +1,7 @@
 import sys
-import pandas as pd
 from pathlib import Path
+
+import pandas as pd
 
 Project_Path = Path(__file__).parents[1]
 sys.path.append(Project_Path)
@@ -8,6 +9,7 @@ sys.path.append(Project_Path)
 from src.Pretreatment.ConfigLoader import ConfigLoader
 from src.Tools.tools import (multi_step, remove_rows_hour_col, shifting,
                              shifting_by_day)
+
 
 class ModelTrainer(ConfigLoader):
     def __init__(self):
@@ -47,7 +49,9 @@ class ModelTrainer(ConfigLoader):
         self.date_end = df_train.index[-1].strftime('%Y-%m-%d')
         self.predict_s = df_test.index[0].strftime('%Y-%m-%d')
         self.predict_e = df_test.index[-1].strftime('%Y-%m-%d')
-        
+
+        print(f"Trainning : from {self.date_s} to {self.date_end}")
+        print(f"Test : from {self.predict_s} to {self.predict_e}")
         return df_train, df_test
 
     def prepare_data(self, data, is_train=True):
