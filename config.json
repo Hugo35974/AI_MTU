@@ -36,13 +36,8 @@
       "BayesianRidge",
       "PassiveAggressiveRegressor",
       "SGDRegressor",
-      "XGBRegressor",
-      "LinearRegression",
       "Ridge",
-      "Lasso",
-      "ElasticNet",
-      "SVR",
-      "MLPRegressor"
+      "ElasticNet"
     ],
     "file_imports": {
       "files": [
@@ -56,8 +51,8 @@
       "model_1": {"path" :"composite_model_2019.pkl",
       "column_name" :"composite_model_2019",
       "periode" : {
-        "start_date": "2019-02-01 00:00:00",
-        "end_date": "2020-10-18 20:00:00"
+        "start_date": "2019-01-01 00:00:00",
+        "end_date": "2020-12-30 20:00:00"
       }},
       "model_2": {"path" :"composite_model_2023.pkl",
       "column_name" :"composite_model_2023",

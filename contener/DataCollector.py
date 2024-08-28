@@ -194,7 +194,7 @@ class DataCollector:
         if model_infos["periode"]["end_date"]:
             latest_time = datetime.strptime(model_infos["periode"]["end_date"], "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
         else:
-            latest_time = self._fetch_latest_data()
+            latest_time = self._fetch_latest_data().replace(tzinfo=timezone.utc)
 
         current_time = current_time.replace(hour=latest_time.hour, minute=latest_time.minute, second=latest_time.second)
 
