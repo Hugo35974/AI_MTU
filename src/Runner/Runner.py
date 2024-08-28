@@ -5,10 +5,13 @@ from sklearn.metrics import mean_absolute_error as MAE
 from sklearn.model_selection import (RandomizedSearchCV, cross_val_predict,
                                      cross_validate)
 from tabulate import tabulate
+
 from src.Model.CompositeModel import CompositeModel
 from src.Pretreatment.ModelTrainer import ModelTrainer
-from src.Tools.tools import (convert_dates, plot_prediction_results,setup_pipeline_single_output,
-                            setup_pipeline_multi_output,train_and_search,evaluate_model,save_best_model)
+from src.Tools.tools import (convert_dates, evaluate_model,
+                             plot_prediction_results, save_best_model,
+                             setup_pipeline_multi_output,
+                             setup_pipeline_single_output, train_and_search)
 
 init(autoreset=True)
 import os
@@ -24,7 +27,6 @@ Main_Path = Path(__file__).parents[0]
 sys.path.append(Project_Path)
 Model_Path = os.path.join(Project_Path,'data','modelsave')
 Contener_Path = os.path.join(Project_Path,'contener')
-model_composite_path = os.path.join(Contener_Path,'composite_model.pkl')
 
 import numpy as np
 from sklearn.metrics import r2_score
@@ -70,7 +72,7 @@ class Run:
             self._print_results(results, ['Model', 'Start-Day-Train', 'End-Day-Train', 'Train-Period', 'Start-Day-Test', 'End-Day-Test', 'Test-Period (days)', 'MAE'])
         return results  
     
-    def build_pipeline(self, df = None):
+    def build_pipeline(self, df = None, model_infos = None):
         # Préparation des données et des modèles
         x_train, y_train, x_test, y_test, features, target, config = self.modeltrainer.process_data_and_train_model(df)
         scalers = [StandardScaler(), MinMaxScaler(), RobustScaler(), QuantileTransformer()]
@@ -105,8 +107,9 @@ class Run:
 
                 # Sauvegarde du modèle
                 save_best_model(search.best_estimator_, model_name, scaler,Model_Path)
-
-        self.create_composite_model(x_train,y_train,x_test,y_test)
+        results_df = pd.DataFrame(results)
+        results_df.to_csv('model_results.csv', index=False)
+        self.create_composite_model(x_train,y_train,x_test,y_test,model_infos)
 
 
     def build_nn_pipeline(self):
@@ -176,7 +179,7 @@ class Run:
 
         print("Results saved to 'model_results_nn.xlsx'.")
 
-    def create_composite_model(self,x_train, y_train, x_test, y_test):
+    def create_composite_model(self,x_train, y_train, x_test, y_test,model_infos = None):
         # Charger les résultats des modèles
         results_df = pd.read_csv('model_results.csv')
 
@@ -212,6 +215,8 @@ class Run:
             y_pred = composite_model.predict(x_test)
             plot_prediction_results(y_test, y_pred, "composite_model", self.modeltrainer.variables_config["target_variable"],y_train)
 
+        model_composite_path = os.path.join(Contener_Path,model_infos["path"])
+        
         with open(model_composite_path, 'wb') as composite_file:
             pickle.dump(composite_model, composite_file)
 

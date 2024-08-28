@@ -47,10 +47,25 @@
     "file_imports": {
       "files": [
         {
-          "file_name": "data_api.csv",
+          "file_name": "Electricity_Prices_Ireland.csv",
           "date_format": "%Y-%m-%d %H:%M:%S"
         }
       ]
+    },
+    "models_infos" :{
+      "model_1": {"path" :"composite_model_2019.pkl",
+      "column_name" :"composite_model_2019",
+      "periode" : {
+        "start_date": "2019-02-01 00:00:00",
+        "end_date": "2020-10-18 20:00:00"
+      }},
+      "model_2": {"path" :"composite_model_2023.pkl",
+      "column_name" :"composite_model_2023",
+      "periode" : {
+        "start_date": "2023-07-01 00:00:00",
+        "end_date": false
+      }
+      }
     }
   }
   
