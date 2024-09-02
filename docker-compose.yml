@@ -52,3 +52,6 @@ services:
       "
     environment:
       - PYTHONUNBUFFERED=1
+volumes:
+  postgres_data:
+  grafana_data:
