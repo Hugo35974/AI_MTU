@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:13
+    container_name: postgres_container
+    environment:
+      POSTGRES_DB: mtu_elec
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana_container
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    depends_on:
+      - postgres
+    volumes:
+      - grafana_data:/var/lib/grafana
+
+  main_app:
+    image: python:3.9
+    container_name: main_app_container
+    working_dir: /app
+    volumes:
+      - ./AI_MTU:/app
+    depends_on:
+      - postgres
+      - grafana
+    entrypoint: >
+      bash -c "
+      # Wait for PostgreSQL to be ready
+      until pg_isready -h postgres -p 5432; do
+        echo 'Waiting for PostgreSQL...';
+        sleep 2;
+      done;
+      # Wait for Grafana to be ready
+      until curl -s http://grafana:3000/api/health | grep '\"status\":\"ok\"'; do
+        echo 'Waiting for Grafana...';
+        sleep 2;
+      done;
+      # Activate the environment and run the Python script
+      source myenv/bin/activate;
+      python Main.py
+      "
+    environment:
+      - PYTHONUNBUFFERED=1
