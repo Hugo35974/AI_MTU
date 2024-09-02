@@ -1,0 +1,30 @@
+stages:
+  - build
+  - deploy
+
+variables:
+  DOCKER_DRIVER: overlay2
+
+before_script:
+  # Assure que Docker est installé
+  - docker info
+  # Authentification si nécessaire (optionnel)
+  # - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
+
+build:
+  stage: build
+  script:
+    # Construire les images Docker nécessaires
+    - docker-compose build
+
+deploy:
+  stage: deploy
+  script:
+    # Lancer le service avec docker-compose
+    - docker-compose up -d
+    # Exécuter Main.py dans le conteneur adéquat
+    - docker-compose exec <nom_du_service> python Main.py
+
+  # Optionnel : arrêter les services après exécution
+  after_script:
+    - docker-compose down
