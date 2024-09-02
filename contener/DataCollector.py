@@ -28,9 +28,9 @@ class DataCollector:
         self._init_connection()
         self._create_table()
         self.inject_historical_data()
-        self._retrain_model(self.config.model_infos["model_1"])
+        # self._retrain_model(self.config.model_infos["model_1"])
         self._predict_historical_data(self.config.model_infos["model_1"])
-        self._retrain_model(self.config.model_infos["model_2"])
+        # self._retrain_model(self.config.model_infos["model_2"])
         self._predict_historical_data(self.config.model_infos["model_2"])
 
     def _init_connection(self):
@@ -79,11 +79,15 @@ class DataCollector:
         with self.connection.cursor() as cur:
             for idx, row in df.iterrows():
                 cur.execute("""
-                    INSERT INTO sensor_data (time, elec_prices_metric, elec_prices)
-                    VALUES (%s, %s, %s)
-                    ON CONFLICT (time)
-                    DO UPDATE SET
-                        elec_prices = EXCLUDED.elec_prices;
+                INSERT INTO sensor_data (time, elec_prices_metric, elec_prices)
+                VALUES (%s, %s, %s)
+                ON CONFLICT (time)
+                DO UPDATE SET
+                    elec_prices = CASE 
+                                    WHEN EXCLUDED.elec_prices IS NOT NULL 
+                                    THEN EXCLUDED.elec_prices 
+                                    ELSE sensor_data.elec_prices 
+                                END;
                 """, (row['time'], row['value'], row['elec_prices']))
         self.connection.commit()
 
@@ -108,8 +112,6 @@ class DataCollector:
             print("-------------------------------")
             print("Extracting API Data with sucess")
             print("-------------------------------")
-        except Exception as e:  
-            print(f"An error occurred: {e}")
             
             csv_path = os.path.join(Timeseries_path, "Electricity_Prices_Ireland.csv")
             df = pd.read_csv(csv_path)
@@ -121,6 +123,9 @@ class DataCollector:
             print("-------------------------------")
             print("Extracting Data CSV with sucess")
             print("-------------------------------")
+
+        except Exception as e:  
+            print(f"An error occurred: {e}")
 
 
     def _get_last_100_hours(self, up_to_time=None):
