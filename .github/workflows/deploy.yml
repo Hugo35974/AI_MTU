@@ -14,4 +14,29 @@ jobs:
       - name: Build and start Docker containers
         run: |
           cd AI_MTU
-          docker-compose up -d
+          docker-compose down  # Nettoie les anciens conteneurs si nécessaire
+          docker-compose build  # Reconstruit les images
+          docker-compose up -d  # Démarre les conteneurs en arrière-plan
+
+      - name: Wait for PostgreSQL to be ready
+        run: |
+          until docker-compose exec -T postgres pg_isready -h postgres -p 5432; do
+            echo "Waiting for PostgreSQL...";
+            sleep 5;
+          done
+
+      - name: Wait for Grafana to be ready
+        run: |
+          until curl -s http://localhost:3000/api/health | grep '"status":"ok"'; do
+            echo "Waiting for Grafana...";
+            sleep 5;
+          done
+
+      - name: Run Main.py
+        run: |
+          docker-compose exec -T main_app python Main.py
+
+      - name: Clean up Docker containers
+        if: always()
+        run: |
+          docker-compose down
