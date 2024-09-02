@@ -13,7 +13,6 @@ jobs:
 
       - name: Build and start Docker containers
         run: |
-          cd AI_MTU
           docker-compose down  # Nettoie les anciens conteneurs si nécessaire
           docker-compose build  # Reconstruit les images
           docker-compose up -d  # Démarre les conteneurs en arrière-plan
