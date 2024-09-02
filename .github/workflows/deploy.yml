@@ -1,4 +1,4 @@
-name: Deploy Pipeline
+name: Deploy AI_MTU Application
 
 on:
   workflow_dispatch:
@@ -6,22 +6,12 @@ on:
 jobs:
   deploy:
     runs-on: self-hosted
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up Docker
-        uses: docker/setup-buildx-action@v2
-
-      - name: Build Docker image
-        run: docker-compose build
-
-      - name: Run Docker containers
-        run: docker-compose up -d
-
-      - name: Execute Main.py in the container
-        run: docker-compose exec <nom_du_service> python Main.py
-
-      - name: Stop and remove Docker containers
-        if: always()
-        run: docker-compose down
+      - name: Build and start Docker containers
+        run: |
+          cd AI_MTU
+          docker-compose up -d
