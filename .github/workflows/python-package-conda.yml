@@ -1,4 +1,4 @@
-name: Python Package using Conda
+name: Run on AWS EC2
 
 on: [push]
 
