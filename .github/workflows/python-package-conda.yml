@@ -1,10 +1,10 @@
-name: Run on AWS EC2
+name: Test Pipeline
 
 on: [push]
 
 jobs:
   build-linux:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     strategy:
       max-parallel: 5
 
