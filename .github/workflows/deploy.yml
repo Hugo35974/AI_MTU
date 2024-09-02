@@ -26,7 +26,7 @@ jobs:
 
       - name: Wait for Grafana to be ready
         run: |
-          until curl -s http://localhost:3000/api/health | grep '"status":"ok"'; do
+          until curl -s http://grafana:3000/api/health | grep '"status":"ok"'; do
             echo "Waiting for Grafana...";
             sleep 5;
           done
