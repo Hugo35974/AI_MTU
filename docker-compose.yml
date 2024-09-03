@@ -36,16 +36,6 @@ services:
       - grafana
     entrypoint: >
       bash -c "
-      # Wait for PostgreSQL to be ready
-      until pg_isready -h postgres -p 5432; do
-        echo 'Waiting for PostgreSQL...';
-        sleep 2;
-      done;
-      # Wait for Grafana to be ready
-      until curl -s http://grafana:3000/api/health | grep '\"status\":\"ok\"'; do
-        echo 'Waiting for Grafana...';
-        sleep 2;
-      done;
       # Activate the environment and run the Python script
       source myenv/bin/activate;
       "
