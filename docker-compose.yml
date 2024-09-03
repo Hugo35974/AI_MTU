@@ -28,6 +28,8 @@ services:
   main_app:
     image: python:3.9
     container_name: main_app_container
+    volumes:
+      - ./AI_MTU:/AI_MTU
     depends_on:
       - postgres
       - grafana
