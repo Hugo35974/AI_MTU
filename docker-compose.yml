@@ -26,27 +26,30 @@ services:
       - grafana_data:/var/lib/grafana
 
   main_app:
-    image: python:3.9
+    image: ubuntu:latest
     container_name: main_app_container
     volumes:
-      - .:/app
+      - .:/app  # Montez le répertoire courant de l'hôte dans /app du conteneur
     depends_on:
       - postgres
       - grafana
     entrypoint: >
       bash -c "
-      # Create and activate the virtual environment
+      # Mettre à jour les paquets et installer les dépendances
+      apt-get update && apt-get install -y python3 python3-pip python3-venv;
+      # Créer et activer l'environnement virtuel
       python3 -m venv ml;
       source ml/bin/activate;
-      # Install requirements
+      # Installer les dépendances
       pip install -r /app/requirements.txt;
-      # Run the Python script
+      # Exécuter le script Python
       python /app/Main.py;
-      # Keep the container running
+      # Garder le conteneur en cours d'exécution
       tail -f /dev/null
       "
     environment:
       - PYTHONUNBUFFERED=1
+
 volumes:
   postgres_data:
   grafana_data:
