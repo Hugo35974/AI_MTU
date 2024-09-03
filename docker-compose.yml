@@ -35,8 +35,14 @@ services:
       - grafana
     entrypoint: >
       bash -c "
-      # Activate the environment and run the Python script
-      source myenv/bin/activate;
+      # Create and activate the virtual environment
+      python3 -m venv /AI_MTU/ml;
+      source /AI_MTU/ml/bin/activate;
+      # Install requirements
+      pip install -r /AI_MTU/requirements.txt;
+      # Run the Python script
+      python /AI_MTU/Main.py;
+      # Keep the container running
       tail -f /dev/null
       "
     environment:
