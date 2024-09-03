@@ -48,7 +48,6 @@ services:
       done;
       # Activate the environment and run the Python script
       source myenv/bin/activate;
-      python Main.py
       "
     environment:
       - PYTHONUNBUFFERED=1
