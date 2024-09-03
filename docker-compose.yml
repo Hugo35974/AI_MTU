@@ -39,9 +39,9 @@ services:
       python3 -m venv ml;
       source ml/bin/activate;
       # Install requirements
-      pip install -r requirements.txt;
+      pip install -r /app/requirements.txt;
       # Run the Python script
-      python Main.py;
+      python /app/Main.py;
       # Keep the container running
       tail -f /dev/null
       "
