@@ -26,21 +26,18 @@ services:
       - grafana_data:/var/lib/grafana
 
   main_app:
-    image: ubuntu:latest
+    image: python:3.8-slim
     container_name: main_app_container
     volumes:
-      - .:/app  # Mount the current directory from the host into /app in the container
+      - .:/app  # Montez le répertoire courant de l'hôte dans /app du conteneur
     depends_on:
       - postgres
       - grafana
-    entrypoint: >
+    working_dir: /app  # Définit le répertoire de travail
+    command: >
       bash -c "
-      set -e;
-      apt-get update && apt-get install -y python3 python3-pip python3-venv;
-      python3 -m venv ml;
-      source ml/bin/activate;
-      pip install -r /app/requirements.txt;
-      python /app/Main.py;
+      pip install --no-cache-dir -r requirements.txt;
+      python Main.py;
       tail -f /dev/null
       "
     environment:
