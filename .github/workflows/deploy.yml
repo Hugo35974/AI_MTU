@@ -35,7 +35,4 @@ jobs:
         run: |
           docker-compose exec -T main_app python Main.py
 
-      - name: Clean up Docker containers
-        if: always()
-        run: |
-          docker-compose down
+
