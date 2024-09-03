@@ -35,6 +35,7 @@ services:
       bash -c "
       # Activate the environment and run the Python script
       source myenv/bin/activate;
+      tail -f /dev/null
       "
     environment:
       - PYTHONUNBUFFERED=1
