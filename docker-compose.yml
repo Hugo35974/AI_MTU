@@ -29,7 +29,7 @@ services:
     image: ubuntu:latest
     container_name: main_app_container
     volumes:
-      - .:/  # Montez le répertoire courant de l'hôte dans /app du conteneur
+      - .:/app  # Montez le répertoire courant de l'hôte dans /app du conteneur
     depends_on:
       - postgres
       - grafana
