@@ -11,7 +11,7 @@ jobs:
       - name: Clean repository
         run: |
           sudo rm -rf /home/ubuntu/actions-runner/_work/AI_MTU/AI_MTU/*
-          
+
       - name: Checkout code
         uses: actions/checkout@v3
 
@@ -33,9 +33,19 @@ jobs:
             echo "Waiting for Grafana...";
             sleep 5;
           done
-          
+
+      - name: Install Python Dependencies
+        run: |
+          docker-compose exec -T main_app bash -c "
+            python3 -m venv ml && \
+            source ml/bin/activate && \
+            pip install --upgrade pip && \
+            pip install --no-cache-dir -r /app/requirements.txt
+          "
+
       - name: Run Main.py
-        run: docker-compose exec -T main_app bash -c "source ml/bin/activate && python3 Main.py"
-
-
-
+        run: |
+          docker-compose exec -T main_app bash -c "
+            source ml/bin/activate && \
+            python3 /app/Main.py
+          "
