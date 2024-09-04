@@ -33,23 +33,3 @@ jobs:
             echo "Waiting for Grafana...";
             sleep 5;
           done
-
-      - name: Install Python Dependencies
-        run: |
-          docker-compose exec main_app bash -c "
-            python3 -m venv ml && \
-            source ml/bin/activate && \
-            pip install --upgrade pip && \
-            pip install --no-cache-dir -r /app/requirements.txt
-          "
-
-      - name: Install Python Dependencies and Run Main.py
-        run: |
-          docker-compose exec -T main_app bash -c "
-            python3 -m venv ml && \
-            source ml/bin/activate && \
-            pip install --upgrade pip && \
-            pip install --no-cache-dir -r /app/requirements.txt && \
-            source ml/bin/activate && \
-            python3 /app/Main.py
-          "
