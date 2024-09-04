@@ -45,7 +45,7 @@ jobs:
 
       - name: Run Main.py
         run: |
-          docker-compose main_app_container bash -c "
+          docker-compose exec main_app_container bash -c "
             source ml/bin/activate && \
             python3 /app/Main.py
           "
