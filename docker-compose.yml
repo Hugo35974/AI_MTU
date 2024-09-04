@@ -36,8 +36,13 @@ services:
     working_dir: /app  # Définit le répertoire de travail
     command: >
       bash -c "
-      tail -f /dev/null
-      "
+            python3 -m venv ml && \
+            source ml/bin/activate && \
+            pip install --upgrade pip && \
+            pip install --no-cache-dir -r /app/requirements.txt && \
+            source ml/bin/activate && \
+            python3 /app/Main.py
+          "
     environment:
       - PYTHONUNBUFFERED=1
 
