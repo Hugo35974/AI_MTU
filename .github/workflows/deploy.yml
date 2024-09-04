@@ -36,7 +36,7 @@ jobs:
 
       - name: Install Python Dependencies
         run: |
-          docker-compose exec -T main_app bash -c "
+          docker-compose exec -T main_app_container bash -c "
             python3 -m venv ml && \
             source ml/bin/activate && \
             pip install --upgrade pip && \
