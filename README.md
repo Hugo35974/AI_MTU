@@ -1,6 +1,6 @@
 # Electricity Price Prediction Project
 
-[![Python Package using Conda](https://github.com/Hugo35974/AI_MTU/actions/workflows/python-package-conda.yml/badge.svg?branch=master)](https://github.com/Hugo35974/AI_MTU/actions/workflows/python-package-conda.yml)
+[![Python Package using Conda](https://github.com/Hugo35974/AI_MTU/actions/workflows/python-package-conda.yml/badge.svg?branch=master)](https://github.com/Hugo35974/AI_MTU/actions/workflows/test.yml)
 
 [![Deploy AI_MTU Application](https://github.com/Hugo35974/AI_MTU/actions/workflows/deploy.yml/badge.svg?branch=master)](https://github.com/Hugo35974/AI_MTU/actions/workflows/deploy.yml)
 
