@@ -33,6 +33,10 @@ jobs:
             echo "Waiting for Grafana...";
             sleep 5;
           done
+          
+      - name: Run Main.py
+        run: |
+          docker-compose exec -T main_app python3 /app/Main.py
 
 
 
