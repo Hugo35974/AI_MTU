@@ -3,7 +3,7 @@
         "dbname" : "mtu_elec",
         "user" : "root",
         "password" : "root",
-        "host" : "localhost",
+        "host" : "postgres",
         "port" : "5432"
     },
     "api":{
