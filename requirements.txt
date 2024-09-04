@@ -1,5 +1,5 @@
 # Machine learning
-numpy==1.24.4
+numpy==1.26.4
 pandas==2.2.2
 scikit-learn==1.4.2
 torch==2.3.1
