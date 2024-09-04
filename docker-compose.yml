@@ -36,8 +36,10 @@ services:
     working_dir: /app  # Définit le répertoire de travail
     command: >
       bash -c "
-      pip install --no-cache-dir -r requirements.txt;
-      python Main.py;
+      python3 -m venv ml;  # Crée un environnement virtuel nommé 'ml'
+      source ml/bin/activate;  # Active l'environnement virtuel
+      pip install --no-cache-dir -r requirements.txt;  # Installe les dépendances dans l'environnement virtuel
+      python Main.py;  # Exécute votre script principal
       tail -f /dev/null
       "
     environment:
