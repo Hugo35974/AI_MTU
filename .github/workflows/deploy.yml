@@ -31,8 +31,5 @@ jobs:
             sleep 5;
           done
 
-      - name: Run Main.py
-        run: |
-          docker-compose exec -T main_app python3 Main.py
 
 
