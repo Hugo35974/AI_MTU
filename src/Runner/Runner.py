@@ -74,7 +74,7 @@ class Run:
     
     def build_pipeline(self, df = None, model_infos = None):
         # Préparation des données et des modèles
-        x_train, y_train, x_test, y_test, features, target, config = self.modeltrainer.process_data_and_train_model(df)
+        x_train, y_train, x_test, y_test, features, target, config = self.modeltrainer.process_data_and_train_model(df,model_infos)
         scalers = [StandardScaler(), MinMaxScaler(), RobustScaler(), QuantileTransformer()]
         results = []
 

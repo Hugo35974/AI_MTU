@@ -87,13 +87,14 @@ class ModelTrainer(ConfigLoader):
         df_final = self.apply_transformations(df)
         return df_final
 
-    def process_data_and_train_model(self,df= None):
+    def process_data_and_train_model(self,df= None,model_infos=None):
         """
         Process the data and train the model, returning the scaled training and testing data.
         """
         # Get the final processed dataframe
         if df:
             df_final = self.get_data_from_api(df)
+            self.variables_config["horizon"] = model_infos["horizon"]
         else: 
             df_final = self.get_final_df()
 
