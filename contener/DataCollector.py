@@ -64,25 +64,17 @@ class DataCollector:
             logger.info("Database connection closed.")
 
     def _create_tables(self):
-        query_timer_status = """
-        CREATE TABLE IF NOT EXISTS timer_status (
-            id SERIAL PRIMARY KEY,
-            check_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            remaining_seconds INT
-        );
-        """
         query_sensor_data = """
             CREATE TABLE IF NOT EXISTS sensor_data (
                 time TIMESTAMP PRIMARY KEY,
                 elec_prices_metric FLOAT
         """
-        for models in self.config.model_infos : 
+        for models in self.config.model_infos :
             column_name = self.config.model_infos[models].get("column_name")
             query_sensor_data += f",\n {column_name} FLOAT\n"
             
         query_sensor_data += ");"
         queries = [
-            query_timer_status,
             query_sensor_data,
             """
             CREATE TABLE IF NOT EXISTS logs (
@@ -158,14 +150,6 @@ class DataCollector:
 
         except Exception as e:
             logger.error(f"An error occurred while injecting historical data: {e}")
-
-    def update_timer_status(self, remaining_seconds):
-        with self.connection.cursor() as cur:
-            cur.execute("""
-                INSERT INTO timer_status (remaining_seconds)
-                VALUES (%s)
-            """, (remaining_seconds,))
-        self.connection.commit()
 
     def _get_last_100_hours(self, up_to_time=None):
         query = sql.SQL("""
@@ -306,10 +290,8 @@ class DataCollector:
                         self._upsert_data(predictions_df, model_info["column_name"])
                         logger.info(f"Predictions made for {model_info['column_name']}.")
 
-            sleep_time = 3600  # 1 heure        
-            for i in range(sleep_time, 0, -1):
-                self.update_timer_status(i)  # Met à jour la table avec le temps restant
-                time.sleep(1)
+            time.sleep(3600)  # 1 heure        
+
 
 
     def run(self):
