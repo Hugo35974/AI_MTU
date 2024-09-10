@@ -22,6 +22,7 @@
       "variables_to_shift": ["elec_prices"],
       "target_variable": "elec_prices",
       "window_lookback(shift)": [1, 100],
+      "horizon": [1,24],
       "hour": 21
     },
     "transformations": {

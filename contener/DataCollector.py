@@ -29,18 +29,18 @@ class DataCollector:
         self._init_connection()
         logger.add(sink=self._log_to_db)
         self._create_tables()
-        # self.inject_historical_data()
+        self.inject_historical_data()
         # self._retrain_model(self.config.model_infos["model_1"])
         # self._retrain_model(self.config.model_infos["model_3"])
         # self._retrain_model(self.config.model_infos["model_4"])
         # self._retrain_model(self.config.model_infos["model_5"])
         # self._retrain_model(self.config.model_infos["model_6"])
-        # self._predict_historical_data(self.config.model_infos["model_1"])
-        # self._predict_historical_data(self.config.model_infos["model_2"])
-        # self._predict_historical_data(self.config.model_infos["model_3"])
-        # self._predict_historical_data(self.config.model_infos["model_4"])
-        # self._predict_historical_data(self.config.model_infos["model_5"])
-        # self._predict_historical_data(self.config.model_infos["model_6"])
+        self._predict_historical_data(self.config.model_infos["model_1"])
+        self._predict_historical_data(self.config.model_infos["model_2"])
+        self._predict_historical_data(self.config.model_infos["model_3"])
+        self._predict_historical_data(self.config.model_infos["model_4"])
+        self._predict_historical_data(self.config.model_infos["model_5"])
+        self._predict_historical_data(self.config.model_infos["model_6"])
 
 
     def _init_connection(self):
@@ -214,7 +214,7 @@ class DataCollector:
 
     def _fetch_latest_data(self):
         with self.connection.cursor() as cur:
-            cur.execute("SELECT MAX(time) FROM sensor_data;")
+            cur.execute("SELECT MAX(time) FROM sensor_data WHERE elec_prices_metric IS NOT NULL;")
             latest_time = cur.fetchone()[0]
         logger.info(f"Latest data fetched from database: {latest_time}.")
         return latest_time
@@ -239,7 +239,7 @@ class DataCollector:
             if last_100_hours is not None:
                 predictions_df = self._predict_next_24_hours(last_100_hours, current_time,model_infos)
                 self._upsert_data(predictions_df,column_name)
-            current_time += timedelta(hours=24)
+            current_time += timedelta(hours=model_infos["horizon"][1])
         logger.info(f"Historical data prediction of {column_name} completed.")
 
     def _retrain_model(self,model_infos):
@@ -314,6 +314,7 @@ class DataCollector:
 
     def run(self):
         self.fetch_and_insert_new_data()
+        print("ok")
 
 if __name__ == "__main__":
     data_collector = DataCollector()
