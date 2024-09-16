@@ -101,15 +101,14 @@ class Run:
 
                 # Évaluation du modèle
                 result = evaluate_model(
-                    search, x_train, y_train, y_test, model_name, scaler, features, target, config, duration
+                    search.best_estimator_, x_train, y_train, x_test, y_test, model_name, config, duration,scaler.__class__.__name__
                 )
                 results.append(result)
 
                 # Sauvegarde du modèle
                 save_best_model(search.best_estimator_, model_name, scaler,Model_Path)
         results_df = pd.DataFrame(results)
-        results_df.to_csv('model_results.csv', index=False)
-        self.create_composite_model(x_train,y_train,x_test,y_test,model_infos)
+        return self.create_composite_model(x_train,y_train,x_test,y_test,results_df,model_infos,config)
 
 
     def build_nn_pipeline(self):
@@ -179,10 +178,9 @@ class Run:
 
         print("Results saved to 'model_results_nn.xlsx'.")
 
-    def create_composite_model(self,x_train, y_train, x_test, y_test,model_infos = None):
+    def create_composite_model(self,x_train, y_train, x_test, y_test,results_df,model_infos = None,config=None):
         # Charger les résultats des modèles
-        results_df = pd.read_csv('model_results.csv')
-
+        column_name = model_infos["column_name"]
         # Sélection des meilleurs modèles par output
         best_models_per_output = {}
         for i in range(y_train.shape[1]):
@@ -190,14 +188,16 @@ class Run:
             best_model_info = results_df.loc[results_df[f"MAE-SRC_T_{i}"].idxmin()]
             best_models_per_output[f'Output_{i}'] = {
                 'Model': best_model_info['Model'],
-                'Best Parameters': best_model_info['Best Parameters'],
                 'R2': best_model_info[f'R2_T_{i}'],
                 'MAE': best_model_info[f'MAE_T_{i}'],
-                'SRC': best_model_info[f'SRC_T_{i}']
+                'SRC': best_model_info[f'SRC_T_{i}'],
+                'MSE': best_model_info[f'MSE_T_{i}'],
+                'RMSE': best_model_info[f'RMSE_T_{i}'],
+                'MAPE': best_model_info[f'MAPE_T_{i}'],
             }
 
-        best_models_df = pd.DataFrame(best_models_per_output).T 
-        best_models_df.to_csv('best_models_per_output.csv', index=False)
+        best_models_df = pd.DataFrame(best_models_per_output).T
+        best_models_df.to_csv(f'data/results/result_CrossVal_{column_name}.csv', index=True)
 
         # Création d'une liste pour stocker les modèles
         individual_models = []
@@ -214,10 +214,18 @@ class Run:
         if self.plot:
             y_pred = composite_model.predict(x_test)
             plot_prediction_results(y_test, y_pred, "composite_model", self.modeltrainer.variables_config["target_variable"],y_train)
-
+        duration = 1
+        result = evaluate_model(
+                    composite_model, x_train, y_train,x_test, y_test,model_infos["column_name"], config, duration
+                )
         model_composite_path = os.path.join(Contener_Path,model_infos["path"])
-        
+
+        result = pd.DataFrame([result])
+
         with open(model_composite_path, 'wb') as composite_file:
             pickle.dump(composite_model, composite_file)
 
+        result.to_csv(f'data/results/result_Test_{column_name}.csv', index=True)
+
         print(f"Composite model saved to {model_composite_path}.")
+        return result

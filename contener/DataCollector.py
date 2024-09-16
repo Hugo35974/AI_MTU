@@ -11,6 +11,7 @@ import requests
 from joblib import load
 from loguru import logger
 from psycopg2 import sql
+from sqlalchemy import create_engine, text
 
 from src.Pretreatment.ConfigLoader import ConfigLoader
 from src.Runner.Runner import Run
@@ -30,17 +31,18 @@ class DataCollector:
         logger.add(sink=self._log_to_db)
         self._create_tables()
         self.inject_historical_data()
-        # self._retrain_model(self.config.model_infos["model_1"])
+        self._retrain_model(self.config.model_infos["model_1"])
+        # self._retrain_model(self.config.model_infos["model_2"])
         # self._retrain_model(self.config.model_infos["model_3"])
         # self._retrain_model(self.config.model_infos["model_4"])
         # self._retrain_model(self.config.model_infos["model_5"])
         # self._retrain_model(self.config.model_infos["model_6"])
-        self._predict_historical_data(self.config.model_infos["model_1"])
-        self._predict_historical_data(self.config.model_infos["model_2"])
-        self._predict_historical_data(self.config.model_infos["model_3"])
-        self._predict_historical_data(self.config.model_infos["model_4"])
-        self._predict_historical_data(self.config.model_infos["model_5"])
-        self._predict_historical_data(self.config.model_infos["model_6"])
+        # self._predict_historical_data(self.config.model_infos["model_1"])
+        # self._predict_historical_data(self.config.model_infos["model_2"])
+        # self._predict_historical_data(self.config.model_infos["model_3"])
+        # self._predict_historical_data(self.config.model_infos["model_4"])
+        # self._predict_historical_data(self.config.model_infos["model_5"])
+        # self._predict_historical_data(self.config.model_infos["model_6"])
 
 
     def _init_connection(self):
@@ -53,6 +55,7 @@ class DataCollector:
                     host=self.config.bdd["host"],
                     port=self.config.bdd["port"]
                 )
+                self.engine = create_engine(f"postgresql://{self.config.bdd['user']}:{self.config.bdd['password']}@{self.config.bdd['host']}:{self.config.bdd['port']}/{self.config.bdd['dbname']}")
                 logger.info("Database connection established successfully.")
             except psycopg2.DatabaseError as e:
                 logger.error(f"Database connection error: {e}")
@@ -64,6 +67,36 @@ class DataCollector:
             logger.info("Database connection closed.")
 
     def _create_tables(self):
+        # Créer une liste dynamique pour les colonnes MAE, R2 et SRC
+        mae_columns = [f"MAE_T_{i} FLOAT" for i in range(24)]
+        r2_columns = [f"R2_T_{i} FLOAT" for i in range(24)]
+        src_columns = [f"SRC_T_{i} FLOAT" for i in range(24)]
+        mse_columns = [f"MSE_T_{i} FLOAT" for i in range(24)]
+        rmse_columns = [f"RMSE_T_{i} FLOAT" for i in range(24)]
+        mape_columns = [f"MAPE_T_{i} FLOAT" for i in range(24)]
+        # Combiner toutes les colonnes en une seule liste
+        additional_columns = mae_columns + r2_columns + src_columns + mse_columns + rmse_columns + mape_columns
+
+        # Requête SQL dynamique pour créer la table avec les colonnes générées
+        query_result = f"""
+        CREATE TABLE IF NOT EXISTS models_performance (
+            Model VARCHAR(50) PRIMARY KEY,
+            Mean_CV_Train_Score FLOAT,
+            Mean_CV_Test_Score FLOAT,
+            R2_Mean FLOAT,
+            MAE_Mean FLOAT,
+            SRC_Mean FLOAT,
+            MSE_Mean FLOAT,
+            RMSE_Mean FLOAT,
+            MAPE_Mean FLOAT,
+            Start_date_trainning TIMESTAMP,
+            End_date_trainning TIMESTAMP,
+            Lookback FLOAT,
+            Horizon FLOAT,
+            Duration_seconds FLOAT,
+            {', '.join(additional_columns)}
+        );
+        """
         query_sensor_data = """
             CREATE TABLE IF NOT EXISTS sensor_data (
                 time TIMESTAMP PRIMARY KEY,
@@ -75,6 +108,7 @@ class DataCollector:
             
         query_sensor_data += ");"
         queries = [
+            query_result,
             query_sensor_data,
             """
             CREATE TABLE IF NOT EXISTS logs (
@@ -181,7 +215,7 @@ class DataCollector:
         x = np.concatenate((last_100_hours.ravel(), date_features))
         predictions = model.predict(x.reshape(1, -1))
 
-        future_dates = [start_time + timedelta(hours=i) for i in range(1, model_infos["horizon"][1]+1)]
+        future_dates = [start_time + timedelta(hours=i) for i in range(model_infos["horizon"][0], model_infos["horizon"][1]+1)]
         return pd.DataFrame({
             'time': future_dates,
             model_infos["column_name"]: predictions.flatten()
@@ -223,11 +257,11 @@ class DataCollector:
             if last_100_hours is not None:
                 predictions_df = self._predict_next_24_hours(last_100_hours, current_time,model_infos)
                 self._upsert_data(predictions_df,column_name)
-            current_time += timedelta(hours=model_infos["horizon"][1])
+            current_time += timedelta(hours=24)
         logger.info(f"Historical data prediction of {column_name} completed.")
 
     def _retrain_model(self,model_infos):
-        
+        column_name = model_infos["column_name"]
         start_time = datetime.strptime(model_infos["periode"]["start_date"], "%Y-%m-%d %H:%M:%S")
 
         if model_infos["periode"]["end_date"]:
@@ -251,8 +285,19 @@ class DataCollector:
             logger.error("Pas assez de données pour réentraîner le modèle.")
             return
 
-        self.runner.build_pipeline(data,model_infos)
-        column_name = model_infos["column_name"]
+        df = self.runner.build_pipeline(data,model_infos)
+        df.columns = df.columns.str.lower()
+
+        delete_query = f"""DELETE FROM models_performance WHERE Model = '{column_name}'"""
+
+        with self.connection.cursor() as cur:
+            cur.execute(delete_query)
+            self.connection.commit()
+
+        # Insérer les nouvelles données dans la table
+        df.to_sql('models_performance', con=self.engine, if_exists='append', index=False)
+
+        logger.info("Données insérées avec succès dans la table models_performance.")
         logger.info(f"Modèle {column_name} réentraîné et sauvegardé.")
 
     def fetch_and_insert_new_data(self):
@@ -290,7 +335,7 @@ class DataCollector:
                         self._upsert_data(predictions_df, model_info["column_name"])
                         logger.info(f"Predictions made for {model_info['column_name']}.")
 
-            time.sleep(3600)  # 1 heure        
+            time.sleep(3600)  # 1 heure
 
 
 

@@ -52,6 +52,8 @@ class ModelTrainer(ConfigLoader):
 
         print(f"Trainning : from {self.date_s} to {self.date_end}")
         print(f"Test : from {self.predict_s} to {self.predict_e}")
+        self.config["date"]["start_date"] = self.date_s
+        self.config["date"]["end_date"] = self.predict_e
         return df_train, df_test
 
     def prepare_data(self, data, is_train=True):
