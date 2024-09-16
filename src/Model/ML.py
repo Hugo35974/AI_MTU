@@ -1,5 +1,5 @@
 from xgboost import XGBRegressor
-
+from lightgbm import LGBMRegressor
 from sklearn.ensemble import (
     RandomForestRegressor,
     GradientBoostingRegressor
@@ -83,8 +83,24 @@ regression_models = {
         'model__n_estimators': [50, 100, 150, 200],
         'model__learning_rate': [0.01, 0.025, 0.1, 0.2],
         'model__max_depth': [3, 5, 7, 9],
-        'model__subsample': [0.1, 0.6, 0.8, 1.0],
-        'model__colsample_bytree': [0.6, 0.8, 1.0],
+        'model__subsample': [0.1,0.4, 0.6, 0.8, 1.0],
+        'model__colsample_bytree': [0.4, 0.6, 0.8, 1.0],
+    }),
+    GradientBoostingRegressor.__name__: (GradientBoostingRegressor, {
+    'model__n_estimators': [50, 100, 150, 200],
+    'model__learning_rate': [0.01, 0.025, 0.1, 0.2],
+    'model__max_depth': [3, 5, 7, 9],
+    'model__min_samples_split': [2, 5, 10],
+    'model__min_samples_leaf': [1, 2, 5],
+    'model__subsample': [0.8, 0.9, 1.0]
+    }),
+    LGBMRegressor.__name__: (LGBMRegressor, {
+        'model__n_estimators': [50, 100, 150, 200],
+        'model__learning_rate': [0.01, 0.025, 0.1, 0.2],
+        'model__max_depth': [3, 5, 7, 9],
+        'model__subsample': [0.4, 0.6, 0.8, 1.0],
+        'model__colsample_bytree': [0.4, 0.6, 0.8, 1.0],
+        'model__verbose': [-1], 
     }),
     RandomForestRegressor.__name__: (RandomForestRegressor, {
         'model__n_estimators': [50, 100, 200],
