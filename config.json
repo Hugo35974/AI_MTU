@@ -36,8 +36,13 @@
       "BayesianRidge",
       "PassiveAggressiveRegressor",
       "SGDRegressor",
+      "XGBRegressor",
+      "LinearRegression",
       "Ridge",
-      "ElasticNet"
+      "Lasso",
+      "ElasticNet",
+      "SVR",
+      "MLPRegressor"
     ],
     "file_imports": {
       "files": [
@@ -52,7 +57,7 @@
       "column_name" :"composite_model_2019_24h",
       "periode" : {
         "start_date": "2019-01-01 20:00:00",
-        "end_date": "2020-12-30 20:00:00"
+        "end_date": "2019-12-12 20:00:00"
       },
       "horizon": [1,24]
       },
@@ -60,17 +65,17 @@
       "column_name" :"composite_model_2019_48h",
       "periode" : {
         "start_date": "2019-01-01 20:00:00",
-        "end_date": "2020-12-30 20:00:00"
+        "end_date": "2019-12-12 20:00:00"
       },
-      "horizon": [1,48]
+      "horizon": [25,48]
       },
       "model_3": {"path" :"composite_model_2019_72h.pkl",
       "column_name" :"composite_model_2019_72h",
       "periode" : {
         "start_date": "2019-01-01 20:00:00",
-        "end_date": "2020-12-30 20:00:00"
+        "end_date": "2019-12-12 20:00:00"
       },
-      "horizon": [1,72]
+      "horizon": [49,72]
       },
       "model_4": {"path" :"composite_model_2023_24h.pkl",
       "column_name" :"composite_model_2023_24h",
@@ -86,7 +91,7 @@
         "start_date": "2023-07-01 20:00:00",
         "end_date": false
       },
-      "horizon": [1,48]
+      "horizon": [25,48]
       },
       "model_6": {"path" :"composite_model_2023_72h.pkl",
       "column_name" :"composite_model_2023_72h",
@@ -94,7 +99,7 @@
         "start_date": "2023-07-01 20:00:00",
         "end_date": false
       },
-      "horizon": [1,72]
+      "horizon": [49,72]
       }
     }
   }

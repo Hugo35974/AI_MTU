@@ -1,20 +1,22 @@
-import pandas as pd 
 import os
-import seaborn as sns
+import pickle
+import time
 from datetime import datetime
 from pathlib import Path
+
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
+import seaborn as sns
+from joblib import Parallel, delayed
+from scipy.stats import spearmanr
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.feature_selection import SelectKBest, f_regression
-from joblib import Parallel, delayed
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
-import pickle
-from scipy.stats import spearmanr
-from sklearn.model_selection import RandomizedSearchCV, cross_validate, cross_val_predict
-import time
-from sklearn.pipeline import Pipeline
+from sklearn.model_selection import (RandomizedSearchCV, cross_val_predict,
+                                     cross_validate)
 from sklearn.multioutput import MultiOutputRegressor
+from sklearn.pipeline import Pipeline
 
 Project_Path = Path(__file__).parents[1]
 
@@ -196,7 +198,7 @@ def setup_pipeline_single_output(scaler, model, model_space, x_train):
         ('scaler', scaler),
         ('feature_selector', SelectKBest(f_regression)),
         ('model', model()),
-    ],n_jobs=-1)
+    ])
     distributions = {**model_space, 'feature_selector__k': list(range(0, x_train.shape[1]))}
     return pipeline, distributions
 
@@ -219,43 +221,72 @@ def train_and_search(pipeline, distributions, x_train, y_train_ravel):
     duration = time.time() - start_time
     return search, duration
 
-def evaluate_model(search, x_train, y_train_ravel, y_test_ravel, model_name, scaler, features, target, config, duration):
-    cv_results = cross_validate(search.best_estimator_, x_train, y_train_ravel, cv=5, scoring='neg_mean_squared_error', return_train_score=True)
-    y_pred = cross_val_predict(search.best_estimator_, x_train, y_train_ravel, cv=5)
+def add_metrics_per_dimension(result, metrics_per_dimension, metric_name):
 
-    spearman_per_dimension = [spearmanr(y_train_ravel[:, i], y_pred[:, i])[0] for i in range(y_train_ravel.shape[1])]
-    r2_per_dimension = [r2_score(y_train_ravel[:, i], y_pred[:, i]) for i in range(y_train_ravel.shape[1])]
-    mae_per_dimension = np.mean(np.abs(y_train_ravel - y_pred), axis=0)
+    for i in range(len(metrics_per_dimension)):
+        result[f'{metric_name}_T_{i}'] = metrics_per_dimension[i]
+    return result
 
-    MAE = np.mean(mae_per_dimension)
-    R2 = np.mean(r2_per_dimension)
-    SRC = np.mean(spearman_per_dimension)
+def calculate_metrics(y_true, y_pred):
+
+    spearman_per_dimension = [spearmanr(y_true[:, i], y_pred[:, i])[0] for i in range(y_true.shape[1])]
+    r2_per_dimension = [r2_score(y_true[:, i], y_pred[:, i]) for i in range(y_true.shape[1])]
+    mae_per_dimension = np.mean(np.abs(y_true - y_pred), axis=0)
+    mse_per_dimension = [mean_squared_error(y_true[:, i], y_pred[:, i]) for i in range(y_true.shape[1])]
+    rmse_per_dimension = np.sqrt(mse_per_dimension)
+    mape_per_dimension = [np.mean(np.abs((y_true[:, i] - y_pred[:, i]) / y_true[:, i])) * 100 for i in range(y_true.shape[1])]
+
+    metrics = {
+        "MAE": np.mean(mae_per_dimension),
+        "R2": np.mean(r2_per_dimension),
+        "SRC": np.mean(spearman_per_dimension),
+        "MSE": np.mean(mse_per_dimension),
+        "RMSE": np.mean(rmse_per_dimension),
+        "MAPE": np.mean(mape_per_dimension),
+        "MSE_per_dimension" : mse_per_dimension,
+        "MAPE_per_dimension": mape_per_dimension,
+        "RMSE_per_dimension": rmse_per_dimension,
+        "MAE_per_dimension": mae_per_dimension,
+        "R2_per_dimension": r2_per_dimension,
+        "SRC_per_dimension": spearman_per_dimension,
+    }
+    
+    return metrics
+
+def evaluate_model(search, x_train, y_train_ravel, x_test, y_test_ravel, model_name, config, duration,scaler = "composite"):
+
+    if scaler == "composite":
+        model_name = model_name
+        y_pred = search.predict(x_test)
+        metrics = calculate_metrics(y_test_ravel, y_pred)
+        
+    else :
+        model_name = model_name + '_' + scaler
+        y_pred = cross_val_predict(search, x_train, y_train_ravel, cv=5)
+        metrics = calculate_metrics(y_train_ravel, y_pred)
 
     result = {
-        'Model': model_name + '_' + scaler.__class__.__name__,
-        'Best Parameters': search.best_params_,
-        'Mean CV Train Score': cv_results['train_score'].mean(),
-        'Mean CV Test Score': cv_results['test_score'].mean(),
-        'R2_Mean': R2,
-        'MAE_Mean': MAE,
-        'SRC_Mean': SRC,
-        'X_Features': features,
-        'Y_Target': target,
-        'Start_date': config.get('date')['start_date'],
-        'End_date': config.get('date')['end_date'],
-        'Lookback': config.get('variables')['window_lookback(shift)'],
-        'Horizon': config.get('variables')['horizon'],
-        'Mode': config.get('mode'),
-        'Duration (seconds)': duration
+        'Model': model_name,
+        'R2_Mean': metrics["R2"],
+        'MAE_Mean': metrics["MAE"],
+        'SRC_Mean': metrics["SRC"],
+        'MSE_Mean': metrics["MSE"],
+        'RMSE_Mean': metrics["RMSE"],
+        'MAPE_Mean': metrics["MAPE"],
+        'Start_date_trainning': config.get('date')['start_date'],
+        'End_date_trainning': config.get('date')['end_date'],
+        'Lookback': config.get('variables')['window_lookback(shift)'][1],
+        'Horizon': config.get('variables')['horizon'][1],
+        'Duration_seconds': duration
     }
 
-    # Add MAE, R2, SRC for each dimension as separate columns
-    for i in range(len(mae_per_dimension)):
-        result[f'MAE_T_{i}'] = mae_per_dimension[i]
-    for i in range(len(r2_per_dimension)):
-        result[f'R2_T_{i}'] = r2_per_dimension[i]
-    for i in range(len(spearman_per_dimension)):
-        result[f'SRC_T_{i}'] = spearman_per_dimension[i]
+    result = add_metrics_per_dimension(result, metrics['MAE_per_dimension'], 'MAE')
+    result = add_metrics_per_dimension(result, metrics['R2_per_dimension'], 'R2')
+    result = add_metrics_per_dimension(result, metrics['SRC_per_dimension'], 'SRC')
+
+    result = add_metrics_per_dimension(result, metrics['MSE_per_dimension'], 'MSE')
+    result = add_metrics_per_dimension(result, metrics['RMSE_per_dimension'], 'RMSE')
+    result = add_metrics_per_dimension(result, metrics['MAPE_per_dimension'], 'MAPE')
 
     return result
 
