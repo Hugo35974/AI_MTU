@@ -9,7 +9,6 @@ sys.path.insert(0, os.path.abspath('../contener'))
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
-html_theme = 'sphinx_rtd_theme'
 project = 'Electricity Forecasting'
 copyright = '2024, Hugo Bénard'
 author = 'Hugo Bénard'
@@ -32,6 +31,6 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = 'alabaster'
+html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
 source_suffix = ['.rst']
