@@ -6,7 +6,8 @@ import pandas as pd
 # Define project paths
 PROJECT_PATH = Path(__file__).parents[1]
 sys.path.append(PROJECT_PATH)
-
+SRC_PATH = Path(__file__).resolve().parents[2] 
+sys.path.append(str(SRC_PATH))
 from src.Pretreatment.ConfigLoader import ConfigLoader
 from src.Tools.tools import (multi_step, remove_rows_hour_col, shifting,
                              shifting_by_day)
