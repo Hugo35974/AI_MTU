@@ -37,12 +37,12 @@ class DataCollector:
         # self._retrain_model(self.config.model_infos["model_4"])
         # self._retrain_model(self.config.model_infos["model_5"])
         # self._retrain_model(self.config.model_infos["model_6"])
-        # self._predict_historical_data(self.config.model_infos["model_1"])
-        # self._predict_historical_data(self.config.model_infos["model_2"])
-        # self._predict_historical_data(self.config.model_infos["model_3"])
-        # self._predict_historical_data(self.config.model_infos["model_4"])
-        # self._predict_historical_data(self.config.model_infos["model_5"])
-        # self._predict_historical_data(self.config.model_infos["model_6"])
+        self._predict_historical_data(self.config.model_infos["model_1"])
+        self._predict_historical_data(self.config.model_infos["model_2"])
+        self._predict_historical_data(self.config.model_infos["model_3"])
+        self._predict_historical_data(self.config.model_infos["model_4"])
+        self._predict_historical_data(self.config.model_infos["model_5"])
+        self._predict_historical_data(self.config.model_infos["model_6"])
 
 
     def _init_connection(self):

@@ -3,8 +3,9 @@ from pathlib import Path
 
 import pandas as pd
 
-Project_Path = Path(__file__).parents[1]
-sys.path.append(Project_Path)
+# Define project paths
+PROJECT_PATH = Path(__file__).parents[1]
+sys.path.append(PROJECT_PATH)
 
 from src.Pretreatment.ConfigLoader import ConfigLoader
 from src.Tools.tools import (multi_step, remove_rows_hour_col, shifting,
@@ -50,8 +51,8 @@ class ModelTrainer(ConfigLoader):
         self.predict_s = df_test.index[0].strftime('%Y-%m-%d')
         self.predict_e = df_test.index[-1].strftime('%Y-%m-%d')
 
-        print(f"Trainning : from {self.date_s} to {self.date_end}")
-        print(f"Test : from {self.predict_s} to {self.predict_e}")
+        print(f"Training: from {self.date_s} to {self.date_end}")
+        print(f"Test: from {self.predict_s} to {self.predict_e}")
         self.config["date"]["start_date"] = self.date_s
         self.config["date"]["end_date"] = self.predict_e
         return df_train, df_test
@@ -70,48 +71,45 @@ class ModelTrainer(ConfigLoader):
         """
         Launch the data processor and apply transformations to get the final dataframe.
         """
-        df_final = self.launchdataprocessor()
+        df_final = self.launch_data_processor()
         df_final = self.apply_transformations(df_final)
         return df_final
-    
+
     def get_data_from_api(self, df):
         """
-        Launch the data processor and apply transformations to get the final dataframe.
+        Convert API data into a DataFrame, set the index, and apply transformations.
         """
-        # Créer le DataFrame et définir l'index sur 'applicable_date'
         df = pd.DataFrame(df, columns=['applicable_date', 'elec_prices'])
         df.set_index('applicable_date', inplace=True)
-        
-        # Convertir l'index en datetime
+
         df.index = pd.to_datetime(df.index, format='%Y-%m-%d %H:%M:%S')
         df = df.sort_index()
-        # Appliquer les transformations et retourner le DataFrame final
         df_final = self.apply_transformations(df)
         return df_final
 
-    def process_data_and_train_model(self,df= None,model_infos=None):
+    def process_data_and_train_model(self, df=None, model_infos=None):
         """
         Process the data and train the model, returning the scaled training and testing data.
         """
-        # Get the final processed dataframe
         if df:
             df_final = self.get_data_from_api(df)
             self.variables_config["horizon"] = model_infos["horizon"]
-        else: 
+        else:
             df_final = self.get_final_df()
 
         # Add more columns for machine learning
         df_final['expanding_window_price'] = df_final['elec_prices'].expanding().mean()
-        df_final = shifting(self.variables_config["variables_to_shift"], df_final, self.variables_config["window_lookback(shift)"])
-        df_final, namelist = multi_step(df_final, self.variables_config["target_variable"],self.variables_config["horizon"])
-        
-        # Split the datasest in train & test set
-        data_train, data_test = self.get_train_test_split(df_final.dropna())
-        
+        df_final = shifting(self.variables_config["variables_to_shift"], df_final,
+                            self.variables_config["window_lookback(shift)"])
+        df_final, namelist = multi_step(df_final, self.variables_config["target_variable"],
+                                        self.variables_config["horizon"])
 
-        if self.mode == 0 :
-            data_train = remove_rows_hour_col(data_train,self.variables_config["hour"])
-            data_test = remove_rows_hour_col(data_test,self.variables_config["hour"])
+        # Split the dataset into train and test sets
+        data_train, data_test = self.get_train_test_split(df_final.dropna())
+
+        if self.mode == 0:
+            data_train = remove_rows_hour_col(data_train, self.variables_config["hour"])
+            data_test = remove_rows_hour_col(data_test, self.variables_config["hour"])
 
         self.target = [self.variables_config["target_variable"]] + namelist
         self.features = self.get_features(df_final)
@@ -121,12 +119,13 @@ class ModelTrainer(ConfigLoader):
         x_test = self.prepare_data(data_test, is_train=False)
         y_true = data_test[self.target]
 
-        print(f"x_names {self.features}")
-        print(f"y_names {self.target}")
+        print(f"x_names: {self.features}")
+        print(f"y_names: {self.target}")
 
-        print(f"Xtrain shape = {x_train.shape}")
-        print(f"Xtest shape = {x_test.shape}")
-        print(f"Ytrain shape = {y_train.shape}")
-        print(f"Ytrue shape = {y_true.shape}")
+        print(f"X_train shape = {x_train.shape}")
+        print(f"X_test shape = {x_test.shape}")
+        print(f"Y_train shape = {y_train.shape}")
+        print(f"Y_true shape = {y_true.shape}")
 
-        return x_train.values, y_train.values, x_test.values, y_true.values, self.features,self.target,self.config
+        return (x_train.values, y_train.values, x_test.values, y_true.values,
+                self.features, self.target, self.config)
