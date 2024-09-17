@@ -1,8 +1,8 @@
 # Electricity Price Prediction Project
 
-![Tests](https://img.shields.io/github/actions/workflow/status/Hugo35974/AI_MTU/test.yml?branch=master&label=Tests&style=flat-square)
-[!Deploy](https://img.shields.io/github/actions/workflow/status/Hugo35974/AI_MTU/deploy.yml?branch=master)](https://github.com/Hugo35974/AI_MTU/actions/workflows/deploy.yml)
-[!Docs](https://img.shields.io/github/actions/workflow/status/Hugo35974/AI_MTU/docs.yml)](https://github.com/Hugo35974/AI_MTU/actions/workflows/docs.yml)
+[![Test CI Pytest](https://github.com/Hugo35974/AI_MTU/actions/workflows/test.yml/badge.svg?branch=master)](https://github.com/Hugo35974/AI_MTU/actions/workflows/test.yml)
+[![Deploy Electricity Forecasting Application on AWS](https://github.com/Hugo35974/AI_MTU/actions/workflows/deploy.yml/badge.svg?branch=master)](https://github.com/Hugo35974/AI_MTU/actions/workflows/deploy.yml)
+[![Deploy Docs](https://github.com/Hugo35974/AI_MTU/actions/workflows/docs.yml/badge.svg)](https://github.com/Hugo35974/AI_MTU/actions/workflows/docs.yml)
 
 
 ## Description
