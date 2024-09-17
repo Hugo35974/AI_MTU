@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>tools module &#8212; Electricity Forecasting 0.1.3 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d1102ebc" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=12dfc556" />
+    <script src="../_static/documentation_options.js?v=360bc84d"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="ConfigLoader" href="ConfigLoader.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-Tools.tools">
+<span id="tools-module"></span><h1>tools module<a class="headerlink" href="#module-Tools.tools" title="Link to this heading">¶</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="Tools.tools.add_metrics_per_dimension">
+<span class="sig-prename descclassname"><span class="pre">Tools.tools.</span></span><span class="sig-name descname"><span class="pre">add_metrics_per_dimension</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">result</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metrics_per_dimension</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Tools/tools.html#add_metrics_per_dimension"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Tools.tools.add_metrics_per_dimension" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Tools.tools.calculate_metrics">
+<span class="sig-prename descclassname"><span class="pre">Tools.tools.</span></span><span class="sig-name descname"><span class="pre">calculate_metrics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y_true</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_pred</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Tools/tools.html#calculate_metrics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Tools.tools.calculate_metrics" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Tools.tools.convert_dates">
+<span class="sig-prename descclassname"><span class="pre">Tools.tools.</span></span><span class="sig-name descname"><span class="pre">convert_dates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">date_config</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Tools/tools.html#convert_dates"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Tools.tools.convert_dates" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Tools.tools.eval_metrics">
+<span class="sig-prename descclassname"><span class="pre">Tools.tools.</span></span><span class="sig-name descname"><span class="pre">eval_metrics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y_true</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_pred</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Tools/tools.html#eval_metrics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Tools.tools.eval_metrics" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Tools.tools.evaluate_model">
+<span class="sig-prename descclassname"><span class="pre">Tools.tools.</span></span><span class="sig-name descname"><span class="pre">evaluate_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">search</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_train</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_train_ravel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_test</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_test_ravel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaler</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'composite'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Tools/tools.html#evaluate_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Tools.tools.evaluate_model" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Tools.tools.export_result">
+<span class="sig-prename descclassname"><span class="pre">Tools.tools.</span></span><span class="sig-name descname"><span class="pre">export_result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scores_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metrics</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Tools/tools.html#export_result"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Tools.tools.export_result" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Tools.tools.feature_importance">
+<span class="sig-prename descclassname"><span class="pre">Tools.tools.</span></span><span class="sig-name descname"><span class="pre">feature_importance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Tools/tools.html#feature_importance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Tools.tools.feature_importance" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Tools.tools.mase">
+<span class="sig-prename descclassname"><span class="pre">Tools.tools.</span></span><span class="sig-name descname"><span class="pre">mase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y_true</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_pred</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_train</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Tools/tools.html#mase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Tools.tools.mase" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Tools.tools.multi_step">
+<span class="sig-prename descclassname"><span class="pre">Tools.tools.</span></span><span class="sig-name descname"><span class="pre">multi_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">horizon</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Tools/tools.html#multi_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Tools.tools.multi_step" title="Link to this definition">¶</a></dt>
+<dd><p>Generate multi-step prediction columns.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Tools.tools.pearson_corr">
+<span class="sig-prename descclassname"><span class="pre">Tools.tools.</span></span><span class="sig-name descname"><span class="pre">pearson_corr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Tools/tools.html#pearson_corr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Tools.tools.pearson_corr" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Tools.tools.plot_prediction_results">
+<span class="sig-prename descclassname"><span class="pre">Tools.tools.</span></span><span class="sig-name descname"><span class="pre">plot_prediction_results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y_true</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_pred</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_train</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Tools/tools.html#plot_prediction_results"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Tools.tools.plot_prediction_results" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Tools.tools.remove_rows_hour_col">
+<span class="sig-prename descclassname"><span class="pre">Tools.tools.</span></span><span class="sig-name descname"><span class="pre">remove_rows_hour_col</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hour</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Tools/tools.html#remove_rows_hour_col"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Tools.tools.remove_rows_hour_col" title="Link to this definition">¶</a></dt>
+<dd><p>Remove rows where the hour is 23 and drop the ‘hour’ column.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Tools.tools.save_best_model">
+<span class="sig-prename descclassname"><span class="pre">Tools.tools.</span></span><span class="sig-name descname"><span class="pre">save_best_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">best_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaler</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modelpath</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Tools/tools.html#save_best_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Tools.tools.save_best_model" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Tools.tools.selectkbest">
+<span class="sig-prename descclassname"><span class="pre">Tools.tools.</span></span><span class="sig-name descname"><span class="pre">selectkbest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_train</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_train</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_test</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">function_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Tools/tools.html#selectkbest"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Tools.tools.selectkbest" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Tools.tools.setup_pipeline_multi_output">
+<span class="sig-prename descclassname"><span class="pre">Tools.tools.</span></span><span class="sig-name descname"><span class="pre">setup_pipeline_multi_output</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scaler</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_space_multi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_train</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Tools/tools.html#setup_pipeline_multi_output"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Tools.tools.setup_pipeline_multi_output" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Tools.tools.setup_pipeline_single_output">
+<span class="sig-prename descclassname"><span class="pre">Tools.tools.</span></span><span class="sig-name descname"><span class="pre">setup_pipeline_single_output</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scaler</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_space</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_train</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Tools/tools.html#setup_pipeline_single_output"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Tools.tools.setup_pipeline_single_output" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Tools.tools.shifting">
+<span class="sig-prename descclassname"><span class="pre">Tools.tools.</span></span><span class="sig-name descname"><span class="pre">shifting</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">list_toshift</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_to_shift</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Tools/tools.html#shifting"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Tools.tools.shifting" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Tools.tools.shifting_by_day">
+<span class="sig-prename descclassname"><span class="pre">Tools.tools.</span></span><span class="sig-name descname"><span class="pre">shifting_by_day</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">list_toshift</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_to_shift</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Tools/tools.html#shifting_by_day"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Tools.tools.shifting_by_day" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Tools.tools.show_result">
+<span class="sig-prename descclassname"><span class="pre">Tools.tools.</span></span><span class="sig-name descname"><span class="pre">show_result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">selector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature_names</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Tools/tools.html#show_result"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Tools.tools.show_result" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Tools.tools.train_and_search">
+<span class="sig-prename descclassname"><span class="pre">Tools.tools.</span></span><span class="sig-name descname"><span class="pre">train_and_search</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipeline</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distributions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_train</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_train_ravel</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Tools/tools.html#train_and_search"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Tools.tools.train_and_search" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">Electricity Forecasting</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Runner.html">Runner</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ModelTrainer.html">ModelTrainer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DataProcessor.html">DataProcessor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ConfigLoader.html">ConfigLoader</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">tools module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#Tools.tools.add_metrics_per_dimension"><code class="docutils literal notranslate"><span class="pre">add_metrics_per_dimension()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Tools.tools.calculate_metrics"><code class="docutils literal notranslate"><span class="pre">calculate_metrics()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Tools.tools.convert_dates"><code class="docutils literal notranslate"><span class="pre">convert_dates()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Tools.tools.eval_metrics"><code class="docutils literal notranslate"><span class="pre">eval_metrics()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Tools.tools.evaluate_model"><code class="docutils literal notranslate"><span class="pre">evaluate_model()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Tools.tools.export_result"><code class="docutils literal notranslate"><span class="pre">export_result()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Tools.tools.feature_importance"><code class="docutils literal notranslate"><span class="pre">feature_importance()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Tools.tools.mase"><code class="docutils literal notranslate"><span class="pre">mase()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Tools.tools.multi_step"><code class="docutils literal notranslate"><span class="pre">multi_step()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Tools.tools.pearson_corr"><code class="docutils literal notranslate"><span class="pre">pearson_corr()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Tools.tools.plot_prediction_results"><code class="docutils literal notranslate"><span class="pre">plot_prediction_results()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Tools.tools.remove_rows_hour_col"><code class="docutils literal notranslate"><span class="pre">remove_rows_hour_col()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Tools.tools.save_best_model"><code class="docutils literal notranslate"><span class="pre">save_best_model()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Tools.tools.selectkbest"><code class="docutils literal notranslate"><span class="pre">selectkbest()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Tools.tools.setup_pipeline_multi_output"><code class="docutils literal notranslate"><span class="pre">setup_pipeline_multi_output()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Tools.tools.setup_pipeline_single_output"><code class="docutils literal notranslate"><span class="pre">setup_pipeline_single_output()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Tools.tools.shifting"><code class="docutils literal notranslate"><span class="pre">shifting()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Tools.tools.shifting_by_day"><code class="docutils literal notranslate"><span class="pre">shifting_by_day()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Tools.tools.show_result"><code class="docutils literal notranslate"><span class="pre">show_result()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Tools.tools.train_and_search"><code class="docutils literal notranslate"><span class="pre">train_and_search()</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="ConfigLoader.html" title="previous chapter">ConfigLoader</a></li>
+  </ul></li>
+</ul>
+</div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2024, Hugo Bénard.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.4.7</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../_sources/source/tools.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
