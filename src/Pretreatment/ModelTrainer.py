@@ -71,7 +71,7 @@ class ModelTrainer(ConfigLoader):
         """
         Launch the data processor and apply transformations to get the final dataframe.
         """
-        df_final = self.launchdataprocessor()
+        df_final = self.launch_data_processor()
         df_final = self.apply_transformations(df_final)
         return df_final
 
