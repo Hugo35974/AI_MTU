@@ -5,6 +5,7 @@ Welcome to the API documentation of the project. This section provides detailed 
 
 .. toctree::
    :maxdepth: 1
+   :caption: Contents:
 
    source/Runner
    source/ModelTrainer
