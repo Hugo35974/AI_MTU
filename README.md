@@ -8,7 +8,11 @@
 
 
 ## Description
+
 This project focuses on research into predicting electricity prices in Ireland using various machine learning (ML) and natural language processing (NLP) models. The aim is to explore different algorithms and techniques to accurately forecast electricity prices based on historical data.
+
+You can find the documentation [here](https://hugo35974.github.io/AI_MTU/index.html).
+
 
 ## Installation
 To get started with the project, follow these steps to install the necessary dependencies.
