@@ -41,7 +41,7 @@ services:
             pip install --upgrade pip && \
             pip install --no-cache-dir -r /app/requirements.txt && \
             source ml/bin/activate && \
-            python3 /app/Main.py
+            python3 /app/main.py
           "
     environment:
       - PYTHONUNBUFFERED=1
