@@ -13,6 +13,9 @@ from loguru import logger
 from psycopg2 import sql
 from sqlalchemy import create_engine, text
 
+SRC_PATH = Path(__file__).resolve().parents[1] 
+sys.path.append(str(SRC_PATH))
+
 from src.Pretreatment.ConfigLoader import ConfigLoader
 from src.Runner.Runner import Run
 

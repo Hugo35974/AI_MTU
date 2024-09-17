@@ -6,10 +6,11 @@ from pathlib import Path
 # Define project paths
 PROJECT_PATH = Path(__file__).parents[2]
 MAIN_PATH = Path(__file__).parents[0]
+SRC_PATH = Path(__file__).resolve().parents[2] 
 
 sys.path.append(PROJECT_PATH)
 sys.path.append(MAIN_PATH)
-
+sys.path.append(str(SRC_PATH))
 from src.Pretreatment.DataProcessor import DataProcessor
 
 

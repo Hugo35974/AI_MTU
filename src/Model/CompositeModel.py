@@ -1,5 +1,8 @@
 import numpy as np
-
+import sys
+from pathlib import Path
+SRC_PATH = Path(__file__).parents[1]
+sys.path.append(SRC_PATH)
 
 class CompositeModel:
     def __init__(self, individual_models):

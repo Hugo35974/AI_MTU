@@ -16,6 +16,9 @@ from sklearn.preprocessing import (
 )
 from tabulate import tabulate
 
+SRC_PATH = Path(__file__).resolve().parents[2] 
+sys.path.append(str(SRC_PATH))
+
 from src.Model.CompositeModel import CompositeModel
 from src.Pretreatment.ModelTrainer import ModelTrainer
 from src.Tools.tools import (
@@ -42,6 +45,11 @@ class Run:
     """
     The Run class is responsible for executing model training and evaluation
     processes. It supports multiple models and scalers.
+
+    :param models: List of model names to use. If None, default models are used.
+    :type models: list of str or None
+    :param plot: Boolean flag to indicate whether to plot results.
+    :type plot: bool
     """
 
     def __init__(self, models=None, plot=False):
@@ -49,7 +57,9 @@ class Run:
         Initialize the Run class with optional models and plotting flag.
 
         :param models: List of model names to use. If None, default models are used.
+        :type models: list of str or None
         :param plot: Boolean flag to indicate whether to plot results.
+        :type plot: bool
         """
         self.model_trainer = ModelTrainer()
         self.models = models if models else self.model_trainer.models
@@ -61,8 +71,11 @@ class Run:
         Prepare results for a given model.
 
         :param model_name: Name of the model.
+        :type model_name: str
         :param mae: Mean Absolute Error.
-        :return: List of results.
+        :type mae: float
+        :return: List of results including model name, dates, periods, and MAE.
+        :rtype: list of str or float
         """
         start_date, end_date, start_test, end_test = convert_dates(self.model_trainer)
         result = [
@@ -82,7 +95,9 @@ class Run:
         Print results in a tabulated format with colored headers.
 
         :param results: List of results to display.
+        :type results: list of list of str or float
         :param headers: List of header names.
+        :type headers: list of str
         """
         headers_colored = [Fore.CYAN + header + Style.RESET_ALL for header in headers]
         table = tabulate(
@@ -95,6 +110,9 @@ class Run:
     def run(self):
         """
         Run the model evaluation and print results.
+
+        :return: List of results for each model.
+        :rtype: list of list of str or float
         """
         results = []
         for model_name in self.models:
@@ -143,13 +161,21 @@ class Run:
         Configure the pipeline and hyperparameter distributions for the given model.
 
         :param model_name: Name of the model.
+        :type model_name: str
         :param model: Model class.
+        :type model: class
         :param model_space: Hyperparameter space for single output.
+        :type model_space: dict
         :param model_space_multi: Hyperparameter space for multi-output.
+        :type model_space_multi: dict
         :param scaler: Scaler to use.
+        :type scaler: sklearn.preprocessing.StandardScaler or similar
         :param x_train: Training features.
+        :type x_train: numpy.ndarray
         :param y_train: Training labels.
+        :type y_train: numpy.ndarray
         :return: Tuple of pipeline and distributions.
+        :rtype: tuple
         """
         if model_name in ["LSTM_Model", "GRU_Model", "RNN_Model"]:
             pipeline = Pipeline([("scaler", scaler), ("model", model())])
@@ -172,8 +198,11 @@ class Run:
         Build and evaluate pipelines for each model and scaler combination.
 
         :param df: DataFrame to use. Default is None.
+        :type df: pandas.DataFrame or None
         :param model_infos: Information about models. Default is None.
+        :type model_infos: dict or None
         :return: Results DataFrame.
+        :rtype: pandas.DataFrame
         """
         (
             x_train,
@@ -249,13 +278,21 @@ class Run:
         Create and evaluate a composite model using the best individual models.
 
         :param x_train: Training features.
+        :type x_train: numpy.ndarray
         :param y_train: Training labels.
+        :type y_train: numpy.ndarray
         :param x_test: Testing features.
+        :type x_test: numpy.ndarray
         :param y_test: Testing labels.
+        :type y_test: numpy.ndarray
         :param results_df: DataFrame with model evaluation results.
+        :type results_df: pandas.DataFrame
         :param model_infos: Information about models.
+        :type model_infos: dict or None
         :param config: Configuration settings.
+        :type config: dict or None
         :return: Evaluation result of the composite model.
+        :rtype: pandas.DataFrame
         """
         column_name = model_infos["column_name"]
         best_models_per_output = {}
