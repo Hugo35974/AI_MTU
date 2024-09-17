@@ -1,8 +1,8 @@
 # Electricity Price Prediction Project
 
 ![Test CI](https://img.shields.io/badge/Test%20CI-Check-brightgreen)
-![Deploy Electricity Forecasting Application on AWS](https://img.shields.io/badge/Deploy%20AWS-success-blue)
-![Deploy Docs](https://img.shields.io/badge/Deploy%20Docs-success-orange)
+![Deploy Electricity Forecasting Application on AWS](https://img.shields.io/badge/Deploy%20AWS-Online-blue)
+![Deploy Docs](https://img.shields.io/badge/Deploy%20Docs-Online-orange)
 
 
 ## Description
