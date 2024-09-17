@@ -3,6 +3,8 @@
 ![Test CI](https://img.shields.io/badge/Test%20CI-Check-brightgreen)
 ![Deploy Electricity Forecasting Application on AWS](https://img.shields.io/badge/Deploy%20AWS-Online-blue)
 ![Deploy Docs](https://img.shields.io/badge/Deploy%20Docs-Online-orange)
+![Latest Release](https://img.shields.io/github/v/release/Hugo35974/AI_MTU)
+
 
 
 ## Description
