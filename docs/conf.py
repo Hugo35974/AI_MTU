@@ -21,7 +21,8 @@ release = '0.1.3'
 extensions = [
     'sphinx.ext.autodoc',  # For automatic documentation generation
     'sphinx.ext.napoleon', # For Google and NumPy style docstrings
-    'sphinx.ext.viewcode', # To include links to the source code
+    'sphinx.ext.viewcode',
+    'sphinx_mdinclude', # To include links to the source code
 ]
 
 templates_path = ['_templates']
@@ -34,4 +35,7 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
-source_suffix = ['.rst']
+source_suffix = {
+    '.rst': 'restructuredtext',
+    '.md': 'markdown',
+}
