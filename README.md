@@ -22,7 +22,7 @@ This research aims to provide valuable insights for energy market participants, 
 
 ![Process deployement](docs/_static/Process.svg)
 
-You can find the documentation [here](https://hugo35974.github.io/AI_MTU/index.html).
+You can find the documentation [here](https://hugo35974.github.io/AI_MTU/).
 
 
 ## Prerequisites
