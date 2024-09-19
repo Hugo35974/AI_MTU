@@ -14,13 +14,13 @@ This project focuses on predicting electricity prices in Ireland using advanced 
 
 ### Prediction Process
 
-![Prediction explanation](./_static/Diagram_Prediction.svg)
+![Prediction explanation](docs/_static/Diagram_Prediction.svg)
 
 This research aims to provide valuable insights for energy market participants, traders, and policymakers, enabling more informed decision-making in the dynamic Irish electricity market.
 
 ### Process Deployement
 
-![Process deployement](./_static/Process.svg)
+![Process deployement](docs/_static/Process.svg)
 
 You can find the documentation [here](https://hugo35974.github.io/AI_MTU/index.html).
 
