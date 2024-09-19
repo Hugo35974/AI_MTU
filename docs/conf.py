@@ -22,7 +22,8 @@ extensions = [
     'sphinx.ext.autodoc',  # For automatic documentation generation
     'sphinx.ext.napoleon', # For Google and NumPy style docstrings
     'sphinx.ext.viewcode',
-    'sphinx_mdinclude', # To include links to the source code
+    'sphinx_mdinclude',
+    'sphinx.ext.imgconverter', # To include links to the source code
 ]
 
 templates_path = ['_templates']
@@ -34,7 +35,7 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_theme = 'sphinx_rtd_theme'
-html_static_path = ['_static']
+html_static_path = ['./_static']
 source_suffix = {
     '.rst': 'restructuredtext',
     '.md': 'markdown',
