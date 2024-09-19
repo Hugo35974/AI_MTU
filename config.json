@@ -3,7 +3,7 @@
         "dbname" : "mtu_elec",
         "user" : "root",
         "password" : "root",
-        "host" : "localhost",
+        "host" : "postgres",
         "port" : "5432"
     },
     "api":{
@@ -33,7 +33,22 @@
       "month" : "month"
       },
     "model" : [
-      "LSTM_Model"
+      "BayesianRidge",
+      "KernelRidge",
+      "KNeighborsRegressor",
+      "NuSVR",
+      "PassiveAggressiveRegressor",
+      "SGDRegressor",
+      "XGBRegressor",
+      "LGBMRegressor",
+      "RandomForestRegressor",
+      "LinearRegression",
+      "Ridge",
+      "Lasso",
+      "ElasticNet",
+      "SVR",
+      "DecisionTreeRegressor",
+      "MLPRegressor"
     ],
     "file_imports": {
       "files": [
