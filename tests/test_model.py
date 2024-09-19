@@ -16,5 +16,5 @@ def test_model():
     runner_ml.model_path = model
     result = runner_ml.run()
 
-    assert round(result[0][7],2) == 25.87
+    assert round(result[0][7],2) == 22.87
 

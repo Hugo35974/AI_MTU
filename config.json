@@ -33,7 +33,7 @@
       "month" : "month"
       },
     "model" : [
-      "BayesianRidge"
+      "LSTM_Model"
     ],
     "file_imports": {
       "files": [
