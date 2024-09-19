@@ -34,7 +34,7 @@ class DataCollector:
         logger.add(sink=self._log_to_db)
         self._create_tables()
         self.inject_historical_data()
-        # self._retrain_model(self.config.model_infos["model_1"])
+        self._retrain_model(self.config.model_infos["model_1"])
         # self._retrain_model(self.config.model_infos["model_2"])
         # self._retrain_model(self.config.model_infos["model_3"])
         # self._retrain_model(self.config.model_infos["model_4"])
@@ -70,20 +70,26 @@ class DataCollector:
             logger.info("Database connection closed.")
 
     def _create_tables(self):
-        # Créer une liste dynamique pour les colonnes MAE, R2 et SRC
-        mae_columns = [f"MAE_T_{i} FLOAT" for i in range(24)]
-        r2_columns = [f"R2_T_{i} FLOAT" for i in range(24)]
-        src_columns = [f"SRC_T_{i} FLOAT" for i in range(24)]
-        mse_columns = [f"MSE_T_{i} FLOAT" for i in range(24)]
-        rmse_columns = [f"RMSE_T_{i} FLOAT" for i in range(24)]
-        mape_columns = [f"MAPE_T_{i} FLOAT" for i in range(24)]
-        # Combiner toutes les colonnes en une seule liste
-        additional_columns = mae_columns + r2_columns + src_columns + mse_columns + rmse_columns + mape_columns
+            """Create necessary database tables if they don't exist."""
+            queries = [
+                self._create_table_query("models_performance_crossval"),
+                self._create_table_query("models_performance"),
+                self._create_sensor_data_table_query(),
+                self._create_logs_table_query(),
+            ]
+            with self.connection.cursor() as cur:
+                for query in queries:
+                    cur.execute(query)
+                self.connection.commit()
+            logger.info("Tables created or verified successfully.")
 
-        # Requête SQL dynamique pour créer la table avec les colonnes générées
-        query_result = f"""
-        CREATE TABLE IF NOT EXISTS models_performance (
-            Model VARCHAR(50) PRIMARY KEY,
+    def _create_table_query(self, name):
+        """Generate SQL query for creating table."""
+        additional_columns = self._generate_additional_columns()
+        return f"""
+        CREATE TABLE IF NOT EXISTS {name} (
+            Model VARCHAR(50),
+            Horizon FLOAT,
             Mean_CV_Train_Score FLOAT,
             Mean_CV_Test_Score FLOAT,
             R2_Mean FLOAT,
@@ -95,38 +101,38 @@ class DataCollector:
             Start_date_trainning TIMESTAMP,
             End_date_trainning TIMESTAMP,
             Lookback FLOAT,
-            Horizon FLOAT,
             Duration_seconds FLOAT,
-            {', '.join(additional_columns)}
+            {', '.join(additional_columns)},
+            PRIMARY KEY (Model, Horizon)
         );
         """
-        query_sensor_data = """
-            CREATE TABLE IF NOT EXISTS sensor_data (
-                time TIMESTAMP PRIMARY KEY,
-                elec_prices_metric FLOAT
+
+    def _create_sensor_data_table_query(self):
+        """Generate SQL query for creating sensor_data table."""
+        columns = [f"{model['column_name']} FLOAT" for model in self.config.model_infos.values()]
+        return f"""
+        CREATE TABLE IF NOT EXISTS sensor_data (
+            time TIMESTAMP PRIMARY KEY,
+            elec_prices_metric FLOAT,
+            {', '.join(columns)}
+        );
         """
-        for models in self.config.model_infos :
-            column_name = self.config.model_infos[models].get("column_name")
-            query_sensor_data += f",\n {column_name} FLOAT\n"
-            
-        query_sensor_data += ");"
-        queries = [
-            query_result,
-            query_sensor_data,
-            """
-            CREATE TABLE IF NOT EXISTS logs (
-                id SERIAL PRIMARY KEY,
-                time TIMESTAMP,
-                level VARCHAR(10),
-                message TEXT
-            );
-            """
-        ]
-        with self.connection.cursor() as cur:
-            for query in queries:
-                cur.execute(query)
-            self.connection.commit()
-        logger.info("Tables created or verified successfully.")
+
+    def _create_logs_table_query(self):
+        """Generate SQL query for creating logs table."""
+        return """
+        CREATE TABLE IF NOT EXISTS logs (
+            id SERIAL PRIMARY KEY,
+            time TIMESTAMP,
+            level VARCHAR(10),
+            message TEXT
+        );
+        """
+
+    def _generate_additional_columns(self):
+        """Generate additional column definitions for models_performance table."""
+        metrics = ['MAE', 'R2', 'SRC', 'MSE', 'RMSE', 'MAPE']
+        return [f"{metric}_T_{i} FLOAT" for metric in metrics for i in range(24)]
 
     def _log_to_db(self, record):
         log_message = record.record['message']
@@ -167,7 +173,7 @@ class DataCollector:
         try:
             latest_data = self._fetch_latest_data_API()
             start_ts = self.date_to_timestamp("2014/01/01")
-            end_ts = int(latest_data.timestamp() * 1000)
+            end_ts = int(latest_data.timestamp() * 1000) + 1
 
             data = self._fetch_data(start_ts, end_ts)
             if data:
@@ -288,17 +294,23 @@ class DataCollector:
             logger.error("Pas assez de données pour réentraîner le modèle.")
             return
 
-        df = self.runner.build_pipeline(data,model_infos)
-        df.columns = df.columns.str.lower()
-
-        delete_query = f"""DELETE FROM models_performance WHERE Model = '{column_name}'"""
-
+        delete_query = [f"""DELETE FROM models_performance WHERE Model = '{column_name}' \
+            AND Horizon = {model_infos["horizon"][1]}""",
+            f"""DELETE FROM models_performance_crossval WHERE Model = '{column_name}' \
+            AND Horizon = {model_infos["horizon"][1]}"""
+        ]
         with self.connection.cursor() as cur:
-            cur.execute(delete_query)
+            for query in delete_query:
+                cur.execute(query)
             self.connection.commit()
 
-        # Insérer les nouvelles données dans la table
-        df.to_sql('models_performance', con=self.engine, if_exists='append', index=False)
+        result_test,result_cross_val = self.runner.build_pipeline(data,model_infos)
+
+        result_cross_val.columns = result_cross_val.columns.str.lower()
+        result_cross_val.to_sql('models_performance_crossval', con=self.engine, if_exists='append', index=False)
+
+        result_test.columns = result_test.columns.str.lower()
+        result_test.to_sql('models_performance', con=self.engine, if_exists='append', index=False)
 
         logger.info("Données insérées avec succès dans la table models_performance.")
         logger.info(f"Modèle {column_name} réentraîné et sauvegardé.")

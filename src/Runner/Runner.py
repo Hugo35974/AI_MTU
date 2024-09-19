@@ -1,6 +1,6 @@
 import os
-import sys
 import pickle
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -8,29 +8,20 @@ import pandas as pd
 from colorama import Fore, Style, init
 from sklearn.metrics import mean_absolute_error as MAE
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import (
-    MinMaxScaler,
-    QuantileTransformer,
-    RobustScaler,
-    StandardScaler,
-)
+from sklearn.preprocessing import (MinMaxScaler, QuantileTransformer,
+                                   RobustScaler, StandardScaler)
 from tabulate import tabulate
 
 SRC_PATH = Path(__file__).resolve().parents[2] 
 sys.path.append(str(SRC_PATH))
 
 from src.Model.CompositeModel import CompositeModel
-from src.Pretreatment.ModelTrainer import ModelTrainer
-from src.Tools.tools import (
-    convert_dates,
-    evaluate_model,
-    plot_prediction_results,
-    save_best_model,
-    setup_pipeline_multi_output,
-    setup_pipeline_single_output,
-    train_and_search,
-)
 from src.Model.ML import regression_models
+from src.Pretreatment.ModelTrainer import ModelTrainer
+from src.Tools.tools import (convert_dates, evaluate_model,
+                             plot_prediction_results, save_best_model,
+                             setup_pipeline_multi_output,
+                             setup_pipeline_single_output, train_and_search)
 
 # Initialize colorama for colored terminal output
 init(autoreset=True)
@@ -259,20 +250,13 @@ class Run:
 
                 save_best_model(search.best_estimator_, model_name, scaler, MODEL_PATH)
 
-        results_df = pd.DataFrame(results)
+        result_cross_val = pd.DataFrame(results)
         return self.create_composite_model(
-            x_train, y_train, x_test, y_test, results_df, model_infos, config
+            x_train, y_train, x_test, y_test, result_cross_val, model_infos, config
         )
 
     def create_composite_model(
-        self,
-        x_train,
-        y_train,
-        x_test,
-        y_test,
-        results_df,
-        model_infos=None,
-        config=None,
+        self, x_train, y_train, x_test, y_test, result_cross_val, model_infos=None, config=None
     ):
         """
         Create and evaluate a composite model using the best individual models.
@@ -297,11 +281,10 @@ class Run:
         column_name = model_infos["column_name"]
         best_models_per_output = {}
 
+        # Optimisation - Add all necessary calculations in-memory without writing intermediate CSV files
         for i in range(y_train.shape[1]):
-            results_df[f"MAE-SRC_T_{i}"] = (
-                results_df[f"MAE_T_{i}"] - results_df[f"SRC_T_{i}"]
-            )
-            best_model_info = results_df.loc[results_df[f"MAE-SRC_T_{i}"].idxmin()]
+            result_cross_val[f"MAE-SRC_T_{i}"] = result_cross_val[f"MAE_T_{i}"] - result_cross_val[f"SRC_T_{i}"]
+            best_model_info = result_cross_val.loc[result_cross_val[f"MAE-SRC_T_{i}"].idxmin()]
             best_models_per_output[f"Output_{i}"] = {
                 "Model": best_model_info["Model"],
                 "R2": best_model_info[f"R2_T_{i}"],
@@ -312,54 +295,51 @@ class Run:
                 "MAPE": best_model_info[f"MAPE_T_{i}"],
             }
 
+        # Convert best models dictionary to DataFrame
         best_models_df = pd.DataFrame(best_models_per_output).T
-        best_models_df.to_csv(
-            f"data/results/result_CrossVal_{column_name}.csv", index=True
-        )
 
-        # Load individual models
+        results_output_path = f"data/results/result_CrossVal_{column_name}.csv"
+        best_models_output_path = f"data/results/result_CrossVal_Selected_{column_name}.csv"
+        best_models_df.to_csv(best_models_output_path, index=True)
+        result_cross_val.to_csv(results_output_path, index=True)
+
+        # Load and fit individual models
         individual_models = []
         for i in range(y_train.shape[1]):
-            model_filename = os.path.join(
-                MODEL_PATH, best_models_per_output[f"Output_{i}"]["Model"] + ".pkl"
-            )
+            model_filename = os.path.join(MODEL_PATH, best_models_per_output[f"Output_{i}"]["Model"] + ".pkl")
             with open(model_filename, "rb") as file:
                 model = pickle.load(file)
                 individual_models.append(model)
 
-        # Create and train the composite model
+        # Create and fit the composite model
         composite_model = CompositeModel(individual_models)
         composite_model.fit(x_train, y_train)
 
         if self.plot:
             y_pred = composite_model.predict(x_test)
             plot_prediction_results(
-                y_test,
-                y_pred,
-                "composite_model",
-                self.model_trainer.variables_config["target_variable"],
-                y_train,
+                y_test, y_pred, "composite_model",
+                self.model_trainer.variables_config["target_variable"], y_train
             )
 
+        # Evaluate the composite model
         duration = 1
         result = evaluate_model(
-            composite_model,
-            x_train,
-            y_train,
-            x_test,
-            y_test,
-            model_infos["column_name"],
-            config,
-            duration,
+            composite_model, x_train, y_train, x_test, y_test, model_infos["column_name"], config, duration
         )
 
         model_composite_path = os.path.join(CONTENER_PATH, model_infos["path"])
+        result_test = pd.DataFrame([result])
 
-        result_df = pd.DataFrame([result])
-
+        # Save the composite model and results in one I/O operation
         with open(model_composite_path, "wb") as composite_file:
             pickle.dump(composite_model, composite_file)
 
-        result_df.to_csv(f"data/results/result_Test_{column_name}.csv", index=True)
+        result_output_path = f"data/results/result_Test_{column_name}.csv"
+        result_test.to_csv(result_output_path, index=True)
+
         print(f"Composite model saved to {model_composite_path}.")
-        return result_df
+        
+        result_cross_val = result_cross_val.drop([col for col in result_cross_val.columns if 'MAE-SRC' in col], axis=1)
+
+        return result_test,result_cross_val
