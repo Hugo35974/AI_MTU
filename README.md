@@ -11,14 +11,16 @@
 ## Description
 
 This project focuses on predicting electricity prices in Ireland using advanced machine learning (ML) and natural language processing (NLP) models. The primary objective is to forecast electricity prices 24, 48, and 72 hours ahead of the official SEMO PX (Single Electricity Market Operator Power Exchange) price publication at 13:00 each day, for the time period of 22:00 to 22:00 the following day.
-Key features of the project include:
 
-Utilization of various ML and NLP algorithms to analyze historical data and predict future prices
-Forecasting capabilities for three different time horizons: 24, 48, and 72 hours in advance
-Focus on the Irish electricity market, specifically the SEMO PX pricing
-Exploration of different techniques to enhance prediction accuracy and reliability
+### Prediction Process
+
+![Prediction explanation](./_static/Diagram_Prediction.svg)
 
 This research aims to provide valuable insights for energy market participants, traders, and policymakers, enabling more informed decision-making in the dynamic Irish electricity market.
+
+### Process Deployement
+
+![Process deployement](./_static/Process.svg)
 
 You can find the documentation [here](https://hugo35974.github.io/AI_MTU/index.html).
 
