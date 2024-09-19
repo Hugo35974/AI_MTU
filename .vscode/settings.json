@@ -3,16 +3,6 @@
         "tests"
     ],
     "python.testing.unittestEnabled": false,
-    "python.testing.pytestEnabled": true,
-    "sqltools.connections": [
-        {
-            "previewLimit": 50,
-            "server": "localhost",
-            "port": 5432,
-            "driver": "PostgreSQL",
-            "database": "mtu_elec",
-            "username": "root",
-            "name": "MTU_BDD"
-        }
-    ]
+    "python.testing.pytestEnabled": true
+
 }
