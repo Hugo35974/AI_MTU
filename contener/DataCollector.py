@@ -13,7 +13,7 @@ from loguru import logger
 from psycopg2 import sql
 from sqlalchemy import create_engine, text
 
-SRC_PATH = Path(__file__).resolve().parents[1] 
+SRC_PATH = Path(__file__).resolve().parents[1]
 sys.path.append(str(SRC_PATH))
 
 from src.Pretreatment.ConfigLoader import ConfigLoader
@@ -294,25 +294,30 @@ class DataCollector:
             logger.error("Pas assez de données pour réentraîner le modèle.")
             return
 
-        delete_query = [f"""DELETE FROM models_performance WHERE Model = '{column_name}' \
-            AND Horizon = {model_infos["horizon"][1]}""",
-            f"""DELETE FROM models_performance_crossval WHERE Model = '{column_name}' \
-            AND Horizon = {model_infos["horizon"][1]}"""
-        ]
-        with self.connection.cursor() as cur:
-            for query in delete_query:
-                cur.execute(query)
-            self.connection.commit()
-
         result_test,result_cross_val = self.runner.build_pipeline(data,model_infos)
 
-        result_cross_val.columns = result_cross_val.columns.str.lower()
-        result_cross_val.to_sql('models_performance_crossval', con=self.engine, if_exists='append', index=False)
+        # ============================================================================
+        # TO INSERT RESULT IN DATABASE
+        # TODO
+        # ============================================================================
 
-        result_test.columns = result_test.columns.str.lower()
-        result_test.to_sql('models_performance', con=self.engine, if_exists='append', index=False)
+        # delete_query = [f"""DELETE FROM models_performance WHERE Model = '{column_name}' \
+        #     AND Horizon = {model_infos["horizon"][1]}""",
+        #     f"""DELETE FROM models_performance_crossval WHERE Model = '{column_name}' \
+        #     AND Horizon = {model_infos["horizon"][1]}"""
+        # ]
+        # with self.connection.cursor() as cur:
+        #     for query in delete_query:
+        #         cur.execute(query)
+        #     self.connection.commit()
 
-        logger.info("Données insérées avec succès dans la table models_performance.")
+        # result_cross_val.columns = result_cross_val.columns.str.lower()
+        # result_cross_val.to_sql('models_performance_crossval', con=self.engine, if_exists='append', index=False)
+
+        # result_test.columns = result_test.columns.str.lower()
+        # result_test.to_sql('models_performance', con=self.engine, if_exists='append', index=False)
+
+        # logger.info("Données insérées avec succès dans la table models_performance.")
         logger.info(f"Modèle {column_name} réentraîné et sauvegardé.")
 
     def fetch_and_insert_new_data(self):

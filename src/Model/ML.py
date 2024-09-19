@@ -1,31 +1,24 @@
-from xgboost import XGBRegressor
-from lightgbm import LGBMRegressor
-from sklearn.ensemble import (
-    RandomForestRegressor,
-    GradientBoostingRegressor
-)
-from sklearn.gaussian_process import GaussianProcessRegressor
-from sklearn.kernel_ridge import KernelRidge
-from sklearn.linear_model import (
-    BayesianRidge,
-    ElasticNet,
-    Lasso,
-    LinearRegression,
-    Ridge,
-    SGDRegressor,
-    PassiveAggressiveRegressor
-)
-from sklearn.neighbors import KNeighborsRegressor
-from sklearn.svm import NuSVR, SVR
-from sklearn.dummy import DummyRegressor
-from sklearn.tree import DecisionTreeRegressor
-from sklearn.neural_network import MLPRegressor
 import sys
 from pathlib import Path
+
+from lightgbm import LGBMRegressor
+from sklearn.dummy import DummyRegressor
+from sklearn.ensemble import GradientBoostingRegressor, RandomForestRegressor
+from sklearn.gaussian_process import GaussianProcessRegressor
+from sklearn.kernel_ridge import KernelRidge
+from sklearn.linear_model import (BayesianRidge, ElasticNet, Lasso,
+                                  LinearRegression, PassiveAggressiveRegressor,
+                                  Ridge, SGDRegressor)
+from sklearn.neighbors import KNeighborsRegressor
+from sklearn.neural_network import MLPRegressor
+from sklearn.svm import SVR, NuSVR
+from sklearn.tree import DecisionTreeRegressor
+from xgboost import XGBRegressor
+
 Project_Path = Path(__file__).parents[0]
 sys.path.append(Project_Path)
 
-# from .NN import LSTM_Model, GRU_Model, RNN_Model
+from .NN import GRU_Model, LSTM_Model, RNN_Model
 
 regression_models = {
     BayesianRidge.__name__: (BayesianRidge, {
@@ -143,23 +136,23 @@ regression_models = {
         'model__alpha': [0.0001, 0.001, 0.01],
         'model__learning_rate': ['constant', 'adaptive'],
         'model__max_iter':[5000]
+    }),
+    LSTM_Model.__name__: (LSTM_Model, {
+        'model__hidden_size': list(range(10, 50)),
+        'model__num_layers': [1, 2],
+        'model__num_epochs': [5000],
+        'model__learning_rate': [0.001, 0.01]
+    }),
+    GRU_Model.__name__: (GRU_Model, {
+        'model__hidden_size': list(range(10, 50)),
+        'model__num_layers': [1, 2],
+        'model__num_epochs': [5000],
+        'model__learning_rate': [0.001, 0.01]
+    }),
+    RNN_Model.__name__: (RNN_Model, {
+        'model__hidden_size': list(range(10, 50)),
+        'model__num_layers': [1, 2],
+        'model__num_epochs': [5000],
+        'model__learning_rate': [0.001, 0.01]
     })
-    # LSTM_Model.__name__: (LSTM_Model, {
-    #     'model__hidden_size': list(range(1, 100)),
-    #     'model__num_layers': [1, 2],
-    #     'model__num_epochs': [5000],
-    #     'model__learning_rate': [0.001, 0.01]
-    # }),
-    # GRU_Model.__name__: (GRU_Model, {
-    #     'model__hidden_size': list(range(1, 100)),
-    #     'model__num_layers': [1, 2],
-    #     'model__num_epochs': [5000],
-    #     'model__learning_rate': [0.001, 0.01]
-    # }),
-    # RNN_Model.__name__: (RNN_Model, {
-    #     'model__hidden_size': list(range(1, 100)),
-    #     'model__num_layers': [1, 2],
-    #     'model__num_epochs': [5000],
-    #     'model__learning_rate': [0.001, 0.01]
-    # })
 }
