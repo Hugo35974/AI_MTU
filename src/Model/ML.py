@@ -18,7 +18,7 @@ from xgboost import XGBRegressor
 Project_Path = Path(__file__).parents[0]
 sys.path.append(Project_Path)
 
-from .NN import GRU_Model, LSTM_Model, RNN_Model
+# from .NN import GRU_Model, LSTM_Model, RNN_Model
 
 regression_models = {
     BayesianRidge.__name__: (BayesianRidge, {
@@ -27,12 +27,6 @@ regression_models = {
         'model__alpha_2': [1e-5, 1e-6, 1e-7],
         'model__lambda_1': [1e-5, 1e-6, 1e-7],
         'model__lambda_2': [1e-5, 1e-6, 1e-7],
-    }),
-    DummyRegressor.__name__: (DummyRegressor, {}),
-    GaussianProcessRegressor.__name__: (GaussianProcessRegressor, {
-        'model__alpha': [1e-8, 1e-9, 1e-10, 1e-11, 1e-12],
-        'model__n_restarts_optimizer': [0, 1, 2, 3],
-        'model__normalize_y': [True, False],
     }),
     KernelRidge.__name__: (KernelRidge, {
         'model__alpha': [0.2, 0.4, 0.6, 0.8, 1.0],
@@ -79,14 +73,6 @@ regression_models = {
         'model__subsample': [0.1,0.4, 0.6, 0.8, 1.0],
         'model__colsample_bytree': [0.4, 0.6, 0.8, 1.0],
     }),
-    GradientBoostingRegressor.__name__: (GradientBoostingRegressor, {
-    'model__n_estimators': [50, 100, 150, 200],
-    'model__learning_rate': [0.01, 0.025, 0.1, 0.2],
-    'model__max_depth': [3, 5, 7, 9],
-    'model__min_samples_split': [2, 5, 10],
-    'model__min_samples_leaf': [1, 2, 5],
-    'model__subsample': [0.8, 0.9, 1.0]
-    }),
     LGBMRegressor.__name__: (LGBMRegressor, {
         'model__n_estimators': [50, 100, 150, 200],
         'model__learning_rate': [0.01, 0.025, 0.1, 0.2],
@@ -100,11 +86,6 @@ regression_models = {
         'model__max_depth': [None, 10, 20, 30],
         'model__min_samples_split': [2, 5, 10],
         'model__min_samples_leaf': [1, 2, 4],
-    }),
-    GradientBoostingRegressor.__name__: (GradientBoostingRegressor, {
-        'model__n_estimators': [50, 100, 200],
-        'model__learning_rate': [0.01, 0.1, 0.2],
-        'model__max_depth': [3, 5, 7],
     }),
     LinearRegression.__name__: (LinearRegression, {
         # Linear Regression does not have hyperparameters for tuning
@@ -136,23 +117,23 @@ regression_models = {
         'model__alpha': [0.0001, 0.001, 0.01],
         'model__learning_rate': ['constant', 'adaptive'],
         'model__max_iter':[5000]
-    }),
-    LSTM_Model.__name__: (LSTM_Model, {
-        'model__hidden_size': list(range(10, 50)),
-        'model__num_layers': [1, 2],
-        'model__num_epochs': [5000],
-        'model__learning_rate': [0.001, 0.01]
-    }),
-    GRU_Model.__name__: (GRU_Model, {
-        'model__hidden_size': list(range(10, 50)),
-        'model__num_layers': [1, 2],
-        'model__num_epochs': [5000],
-        'model__learning_rate': [0.001, 0.01]
-    }),
-    RNN_Model.__name__: (RNN_Model, {
-        'model__hidden_size': list(range(10, 50)),
-        'model__num_layers': [1, 2],
-        'model__num_epochs': [5000],
-        'model__learning_rate': [0.001, 0.01]
     })
+#     LSTM_Model.__name__: (LSTM_Model, {
+#         'model__hidden_size': list(range(10, 50)),
+#         'model__num_layers': [1, 2],
+#         'model__num_epochs': [5000],
+#         'model__learning_rate': [0.001, 0.01]
+#     }),
+#     GRU_Model.__name__: (GRU_Model, {
+#         'model__hidden_size': list(range(10, 50)),
+#         'model__num_layers': [1, 2],
+#         'model__num_epochs': [5000],
+#         'model__learning_rate': [0.001, 0.01]
+#     }),
+#     RNN_Model.__name__: (RNN_Model, {
+#         'model__hidden_size': list(range(10, 50)),
+#         'model__num_layers': [1, 2],
+#         'model__num_epochs': [5000],
+#         'model__learning_rate': [0.001, 0.01]
+#     })
 }
