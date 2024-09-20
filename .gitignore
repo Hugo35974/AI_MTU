@@ -108,12 +108,9 @@ dmypy.json
 # pytype static type analyzer
 .pytype/
 /data/modelsave
-/data/results
 best_models_per_output.csv
 model_results.csv
 model_results.xlsx
 data/results/model_results.xlsx
-/data/results
-/data/results
 data/results/model_results_nn.xlsx
 /ml

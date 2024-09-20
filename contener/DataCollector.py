@@ -34,7 +34,7 @@ class DataCollector:
         logger.add(sink=self._log_to_db)
         self._create_tables()
         self.inject_historical_data()
-        self._retrain_model(self.config.model_infos["model_1"])
+        # self._retrain_model(self.config.model_infos["model_1"])
         # self._retrain_model(self.config.model_infos["model_2"])
         # self._retrain_model(self.config.model_infos["model_3"])
         # self._retrain_model(self.config.model_infos["model_4"])
