@@ -91,25 +91,46 @@
 <dt class="sig sig-object py" id="DataCollector.DataCollector">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">DataCollector.</span></span><span class="sig-name descname"><span class="pre">DataCollector</span></span><a class="reference internal" href="../_modules/DataCollector.html#DataCollector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#DataCollector.DataCollector" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A class for collecting, processing, and predicting electricity price data.</p>
+<p>This class handles database connections, data fetching from an API,
+data insertion into a database, and running predictions using machine learning models.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="DataCollector.DataCollector.date_to_timestamp">
 <span class="sig-name descname"><span class="pre">date_to_timestamp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">date_str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/DataCollector.html#DataCollector.date_to_timestamp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#DataCollector.DataCollector.date_to_timestamp" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Convert a date string to a timestamp in milliseconds.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>date_str</strong> (<em>str</em>) – Date string in format “YYYY/MM/DD”.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Timestamp in milliseconds.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="DataCollector.DataCollector.fetch_and_insert_new_data">
 <span class="sig-name descname"><span class="pre">fetch_and_insert_new_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/DataCollector.html#DataCollector.fetch_and_insert_new_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#DataCollector.DataCollector.fetch_and_insert_new_data" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Continuously fetch new data from the API and insert it into the database.</p>
+<p>This method runs in an infinite loop, fetching new data every hour,
+inserting it into the database, and making predictions using the available models.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="DataCollector.DataCollector.inject_historical_data">
 <span class="sig-name descname"><span class="pre">inject_historical_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/DataCollector.html#DataCollector.inject_historical_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#DataCollector.DataCollector.inject_historical_data" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Inject historical data from both API and CSV file into the database.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="DataCollector.DataCollector.run">
 <span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/DataCollector.html#DataCollector.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#DataCollector.DataCollector.run" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Main method to run the data collection and prediction process.</p>
+<p>This method initiates the continuous process of fetching and inserting new data.</p>
+</dd></dl>
 
 </dd></dl>
 

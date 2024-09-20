@@ -103,6 +103,12 @@
 <div class="viewcode-block" id="DataCollector">
 <a class="viewcode-back" href="../source/DataCollector.html#DataCollector.DataCollector">[docs]</a>
 <span class="k">class</span> <span class="nc">DataCollector</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A class for collecting, processing, and predicting electricity price data.</span>
+
+<span class="sd">    This class handles database connections, data fetching from an API,</span>
+<span class="sd">    data insertion into a database, and running predictions using machine learning models.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">ConfigLoader</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">runner</span> <span class="o">=</span> <span class="n">Run</span><span class="p">()</span>
@@ -126,8 +132,13 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_predict_historical_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">model_infos</span><span class="p">[</span><span class="s2">&quot;model_5&quot;</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_predict_historical_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">model_infos</span><span class="p">[</span><span class="s2">&quot;model_6&quot;</span><span class="p">])</span>
 
-
     <span class="k">def</span> <span class="nf">_init_connection</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize the database connection.</span>
+
+<span class="sd">        Establishes a connection to the PostgreSQL database using the configuration</span>
+<span class="sd">        provided in self.config.bdd. Also sets up an SQLAlchemy engine for ORM operations.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">closed</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">connection</span> <span class="o">=</span> <span class="n">psycopg2</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span>
@@ -144,26 +155,45 @@
                 <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_close_connection</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Close the database connection if it&#39;s open.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">closed</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Database connection closed.&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_create_tables</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">            </span><span class="sd">&quot;&quot;&quot;Create necessary database tables if they don&#39;t exist.&quot;&quot;&quot;</span>
-            <span class="n">queries</span> <span class="o">=</span> <span class="p">[</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_create_table_query</span><span class="p">(</span><span class="s2">&quot;models_performance_crossval&quot;</span><span class="p">),</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_create_table_query</span><span class="p">(</span><span class="s2">&quot;models_performance&quot;</span><span class="p">),</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_create_sensor_data_table_query</span><span class="p">(),</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_create_logs_table_query</span><span class="p">(),</span>
-            <span class="p">]</span>
-            <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span> <span class="k">as</span> <span class="n">cur</span><span class="p">:</span>
-                <span class="k">for</span> <span class="n">query</span> <span class="ow">in</span> <span class="n">queries</span><span class="p">:</span>
-                    <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Tables created or verified successfully.&quot;</span><span class="p">)</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create necessary database tables if they don&#39;t exist.</span>
+
+<span class="sd">        This method creates the following tables:</span>
+<span class="sd">        - models_performance_crossval</span>
+<span class="sd">        - models_performance</span>
+<span class="sd">        - sensor_data</span>
+<span class="sd">        - logs</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">queries</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_create_table_query</span><span class="p">(</span><span class="s2">&quot;models_performance_crossval&quot;</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_create_table_query</span><span class="p">(</span><span class="s2">&quot;models_performance&quot;</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_create_sensor_data_table_query</span><span class="p">(),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_create_logs_table_query</span><span class="p">(),</span>
+        <span class="p">]</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span> <span class="k">as</span> <span class="n">cur</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">query</span> <span class="ow">in</span> <span class="n">queries</span><span class="p">:</span>
+                <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Tables created or verified successfully.&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_create_table_query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate SQL query for creating table.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generate SQL query for creating a table.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str): The name of the table to create.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: SQL query for creating the specified table.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">additional_columns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generate_additional_columns</span><span class="p">()</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
 <span class="s2">        CREATE TABLE IF NOT EXISTS </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> (</span>
@@ -187,7 +217,12 @@
 <span class="s2">        &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">_create_sensor_data_table_query</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate SQL query for creating sensor_data table.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generate SQL query for creating the sensor_data table.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: SQL query for creating the sensor_data table.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model</span><span class="p">[</span><span class="s1">&#39;column_name&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> FLOAT&quot;</span> <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">model_infos</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
 <span class="s2">        CREATE TABLE IF NOT EXISTS sensor_data (</span>
@@ -198,7 +233,12 @@
 <span class="s2">        &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">_create_logs_table_query</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate SQL query for creating logs table.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generate SQL query for creating the logs table.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: SQL query for creating the logs table.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="s2">&quot;&quot;&quot;</span>
 <span class="s2">        CREATE TABLE IF NOT EXISTS logs (</span>
 <span class="s2">            id SERIAL PRIMARY KEY,</span>
@@ -209,11 +249,22 @@
 <span class="s2">        &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">_generate_additional_columns</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate additional column definitions for models_performance table.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generate additional column definitions for models_performance table.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: List of additional column definitions.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">metrics</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;MAE&#39;</span><span class="p">,</span> <span class="s1">&#39;R2&#39;</span><span class="p">,</span> <span class="s1">&#39;SRC&#39;</span><span class="p">,</span> <span class="s1">&#39;MSE&#39;</span><span class="p">,</span> <span class="s1">&#39;RMSE&#39;</span><span class="p">,</span> <span class="s1">&#39;MAPE&#39;</span><span class="p">]</span>
         <span class="k">return</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">metric</span><span class="si">}</span><span class="s2">_T_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2"> FLOAT&quot;</span> <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">metrics</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">24</span><span class="p">)]</span>
 
     <span class="k">def</span> <span class="nf">_log_to_db</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Log a record to the database.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            record: The log record to be inserted into the database.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">log_message</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">record</span><span class="p">[</span><span class="s1">&#39;message&#39;</span><span class="p">]</span>
         <span class="n">log_level</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;level&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">name</span>
         <span class="n">log_time</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">timestamp</span><span class="p">()</span>
@@ -226,6 +277,16 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">_fetch_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start_ts</span><span class="p">,</span> <span class="n">end_ts</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Fetch data from the API for a given time range.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            start_ts (int): Start timestamp in milliseconds.</span>
+<span class="sd">            end_ts (int): End timestamp in milliseconds.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict or None: JSON response from the API if successful, None otherwise.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;startTs&#39;</span><span class="p">:</span> <span class="n">start_ts</span><span class="p">,</span> <span class="s1">&#39;endTs&#39;</span><span class="p">:</span> <span class="n">end_ts</span><span class="p">}</span>
         <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">api_url</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
@@ -235,6 +296,13 @@
         <span class="k">return</span> <span class="kc">None</span>
 
     <span class="k">def</span> <span class="nf">_upsert_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">dynamic_column_name</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Upsert (insert or update) data into the sensor_data table.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            df (pandas.DataFrame): DataFrame containing the data to upsert.</span>
+<span class="sd">            dynamic_column_name (str): Name of the column to upsert.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span> <span class="k">as</span> <span class="n">cur</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
                 <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
@@ -248,12 +316,24 @@
 <div class="viewcode-block" id="DataCollector.date_to_timestamp">
 <a class="viewcode-back" href="../source/DataCollector.html#DataCollector.DataCollector.date_to_timestamp">[docs]</a>
     <span class="k">def</span> <span class="nf">date_to_timestamp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">date_str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convert a date string to a timestamp in milliseconds.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            date_str (str): Date string in format &quot;YYYY/MM/DD&quot;.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            int: Timestamp in milliseconds.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">date_str</span><span class="p">,</span> <span class="s2">&quot;%Y/%m/</span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">timestamp</span><span class="p">())</span> <span class="o">*</span> <span class="mi">1000</span></div>
 
 
 <div class="viewcode-block" id="DataCollector.inject_historical_data">
 <a class="viewcode-back" href="../source/DataCollector.html#DataCollector.DataCollector.inject_historical_data">[docs]</a>
     <span class="k">def</span> <span class="nf">inject_historical_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Inject historical data from both API and CSV file into the database.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">latest_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fetch_latest_data_API</span><span class="p">()</span>
             <span class="n">start_ts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">date_to_timestamp</span><span class="p">(</span><span class="s2">&quot;2014/01/01&quot;</span><span class="p">)</span>
@@ -280,6 +360,15 @@
 
 
     <span class="k">def</span> <span class="nf">_get_last_100_hours</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">up_to_time</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retrieve the last 100 hours of data from the sensor_data table.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            up_to_time (datetime, optional): The upper time limit for the data retrieval.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            tuple: A numpy array of the last 100 hours of data and the most recent timestamp.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">query</span> <span class="o">=</span> <span class="n">sql</span><span class="o">.</span><span class="n">SQL</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
 <span class="s2">        SELECT time, elec_prices_metric</span>
 <span class="s2">        FROM sensor_data</span>
@@ -299,6 +388,17 @@
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">values</span><span class="p">),</span> <span class="n">times</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="nf">_predict_next_24_hours</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">last_100_hours</span><span class="p">,</span> <span class="n">start_time</span><span class="p">,</span> <span class="n">model_infos</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Predict the next 24 hours of electricity prices using the specified model.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            last_100_hours (numpy.array): Array of the last 100 hours of data.</span>
+<span class="sd">            start_time (datetime): The start time for the prediction.</span>
+<span class="sd">            model_infos (dict): Information about the model to use for prediction.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pandas.DataFrame: DataFrame containing the predictions for the next 24 hours.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">model</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">Main_path</span><span class="p">,</span> <span class="n">model_infos</span><span class="p">[</span><span class="s2">&quot;path&quot;</span><span class="p">]))</span>
         <span class="n">date_features</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
             <span class="n">start_time</span><span class="o">.</span><span class="n">weekday</span><span class="p">(),</span> 
@@ -316,6 +416,12 @@
         <span class="p">})</span>
 
     <span class="k">def</span> <span class="nf">_fetch_latest_data_API</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Fetch the latest data from the API.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            datetime or None: The timestamp of the latest data if successful, None otherwise.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">api_url_latest</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
             <span class="n">latest_data</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
@@ -325,6 +431,12 @@
         <span class="k">return</span> <span class="kc">None</span>
 
     <span class="k">def</span> <span class="nf">_fetch_latest_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Fetch the latest data from the database.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            datetime: The timestamp of the latest data in the database.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span> <span class="k">as</span> <span class="n">cur</span><span class="p">:</span>
             <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;SELECT MAX(time) FROM sensor_data WHERE elec_prices_metric IS NOT NULL;&quot;</span><span class="p">)</span>
             <span class="n">latest_time</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
@@ -333,7 +445,10 @@
 
     <span class="k">def</span> <span class="nf">_predict_historical_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model_infos</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Predict and insert data for all historical records using the model.</span>
+<span class="sd">        Predict and insert data for all historical records using the specified model.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            model_infos (dict): Information about the model to use for prediction.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">start_date</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">model_infos</span><span class="p">[</span><span class="s2">&quot;periode&quot;</span><span class="p">][</span><span class="s2">&quot;start_date&quot;</span><span class="p">],</span> <span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">tzinfo</span><span class="o">=</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span>
         <span class="n">current_time</span> <span class="o">=</span> <span class="n">start_date</span> <span class="o">+</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="mi">102</span><span class="p">)</span>
@@ -353,61 +468,15 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">_upsert_data</span><span class="p">(</span><span class="n">predictions_df</span><span class="p">,</span><span class="n">column_name</span><span class="p">)</span>
             <span class="n">current_time</span> <span class="o">+=</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="mi">24</span><span class="p">)</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Historical data prediction of </span><span class="si">{</span><span class="n">column_name</span><span class="si">}</span><span class="s2"> completed.&quot;</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">_retrain_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">model_infos</span><span class="p">):</span>
-        <span class="n">column_name</span> <span class="o">=</span> <span class="n">model_infos</span><span class="p">[</span><span class="s2">&quot;column_name&quot;</span><span class="p">]</span>
-        <span class="n">start_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">model_infos</span><span class="p">[</span><span class="s2">&quot;periode&quot;</span><span class="p">][</span><span class="s2">&quot;start_date&quot;</span><span class="p">],</span> <span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">model_infos</span><span class="p">[</span><span class="s2">&quot;periode&quot;</span><span class="p">][</span><span class="s2">&quot;end_date&quot;</span><span class="p">]:</span>
-            <span class="n">end_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">model_infos</span><span class="p">[</span><span class="s2">&quot;periode&quot;</span><span class="p">][</span><span class="s2">&quot;end_date&quot;</span><span class="p">],</span> <span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">end_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span><span class="o">-</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
-
-        <span class="n">end_time</span> <span class="o">=</span> <span class="n">end_time</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">tzinfo</span><span class="o">=</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span>
-
-        <span class="n">query</span> <span class="o">=</span> <span class="n">sql</span><span class="o">.</span><span class="n">SQL</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">        SELECT time,elec_prices_metric</span>
-<span class="s2">        FROM sensor_data</span>
-<span class="s2">        WHERE time BETWEEN </span><span class="si">%s</span><span class="s2"> AND </span><span class="si">%s</span>
-<span class="s2">        &quot;&quot;&quot;</span><span class="p">)</span>
-
-        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span> <span class="k">as</span> <span class="n">cur</span><span class="p">:</span>
-            <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="p">(</span><span class="n">start_time</span><span class="p">,</span> <span class="n">end_time</span><span class="p">))</span>
-            <span class="n">data</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()</span>
-
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">100</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Pas assez de données pour réentraîner le modèle.&quot;</span><span class="p">)</span>
-            <span class="k">return</span>
-
-        <span class="n">result_test</span><span class="p">,</span><span class="n">result_cross_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">build_pipeline</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="n">model_infos</span><span class="p">)</span>
-
-        <span class="c1"># ============================================================================</span>
-        <span class="c1"># TO INSERT RESULT IN DATABASE</span>
-        <span class="c1"># TODO</span>
-        <span class="c1"># ============================================================================</span>
-
-        <span class="c1"># delete_query = [f&quot;&quot;&quot;DELETE FROM models_performance WHERE Model = &#39;{column_name}&#39; \</span>
-        <span class="c1">#     AND Horizon = {model_infos[&quot;horizon&quot;][1]}&quot;&quot;&quot;,</span>
-        <span class="c1">#     f&quot;&quot;&quot;DELETE FROM models_performance_crossval WHERE Model = &#39;{column_name}&#39; \</span>
-        <span class="c1">#     AND Horizon = {model_infos[&quot;horizon&quot;][1]}&quot;&quot;&quot;</span>
-        <span class="c1"># ]</span>
-        <span class="c1"># with self.connection.cursor() as cur:</span>
-        <span class="c1">#     for query in delete_query:</span>
-        <span class="c1">#         cur.execute(query)</span>
-        <span class="c1">#     self.connection.commit()</span>
-
-        <span class="c1"># result_cross_val.columns = result_cross_val.columns.str.lower()</span>
-        <span class="c1"># result_cross_val.to_sql(&#39;models_performance_crossval&#39;, con=self.engine, if_exists=&#39;append&#39;, index=False)</span>
-
-        <span class="c1"># result_test.columns = result_test.columns.str.lower()</span>
-        <span class="c1"># result_test.to_sql(&#39;models_performance&#39;, con=self.engine, if_exists=&#39;append&#39;, index=False)</span>
-
-        <span class="c1"># logger.info(&quot;Données insérées avec succès dans la table models_performance.&quot;)</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Modèle </span><span class="si">{</span><span class="n">column_name</span><span class="si">}</span><span class="s2"> réentraîné et sauvegardé.&quot;</span><span class="p">)</span>
-
 <div class="viewcode-block" id="DataCollector.fetch_and_insert_new_data">
 <a class="viewcode-back" href="../source/DataCollector.html#DataCollector.DataCollector.fetch_and_insert_new_data">[docs]</a>
     <span class="k">def</span> <span class="nf">fetch_and_insert_new_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Continuously fetch new data from the API and insert it into the database.</span>
+
+<span class="sd">        This method runs in an infinite loop, fetching new data every hour,</span>
+<span class="sd">        inserting it into the database, and making predictions using the available models.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
             <span class="c1"># Récupérer la dernière donnée disponible via l&#39;API</span>
             <span class="n">latest_time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fetch_latest_data_API</span><span class="p">()</span>
@@ -445,11 +514,14 @@
             <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">3600</span><span class="p">)</span>  <span class="c1"># 1 heure</span></div>
 
 
-
-
 <div class="viewcode-block" id="DataCollector.run">
 <a class="viewcode-back" href="../source/DataCollector.html#DataCollector.DataCollector.run">[docs]</a>
     <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Main method to run the data collection and prediction process.</span>
+
+<span class="sd">        This method initiates the continuous process of fetching and inserting new data.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fetch_and_insert_new_data</span><span class="p">()</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ok&quot;</span><span class="p">)</span></div>
 </div>
