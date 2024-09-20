@@ -24,6 +24,12 @@ Project_path = Path(__file__).parents[1]
 Timeseries_path = os.path.join(Project_path, "data", "timeseries")
 
 class DataCollector:
+    """
+    A class for collecting, processing, and predicting electricity price data.
+
+    This class handles database connections, data fetching from an API,
+    data insertion into a database, and running predictions using machine learning models.
+    """
     def __init__(self):
         self.config = ConfigLoader()
         self.runner = Run()
@@ -47,8 +53,13 @@ class DataCollector:
         self._predict_historical_data(self.config.model_infos["model_5"])
         self._predict_historical_data(self.config.model_infos["model_6"])
 
-
     def _init_connection(self):
+        """
+        Initialize the database connection.
+
+        Establishes a connection to the PostgreSQL database using the configuration
+        provided in self.config.bdd. Also sets up an SQLAlchemy engine for ORM operations.
+        """
         if not self.connection or self.connection.closed:
             try:
                 self.connection = psycopg2.connect(
@@ -65,26 +76,45 @@ class DataCollector:
                 sys.exit(1)
 
     def _close_connection(self):
+        """
+        Close the database connection if it's open.
+        """
         if self.connection and not self.connection.closed:
             self.connection.close()
             logger.info("Database connection closed.")
 
     def _create_tables(self):
-            """Create necessary database tables if they don't exist."""
-            queries = [
-                self._create_table_query("models_performance_crossval"),
-                self._create_table_query("models_performance"),
-                self._create_sensor_data_table_query(),
-                self._create_logs_table_query(),
-            ]
-            with self.connection.cursor() as cur:
-                for query in queries:
-                    cur.execute(query)
-                self.connection.commit()
-            logger.info("Tables created or verified successfully.")
+        """
+        Create necessary database tables if they don't exist.
+
+        This method creates the following tables:
+        - models_performance_crossval
+        - models_performance
+        - sensor_data
+        - logs
+        """
+        queries = [
+            self._create_table_query("models_performance_crossval"),
+            self._create_table_query("models_performance"),
+            self._create_sensor_data_table_query(),
+            self._create_logs_table_query(),
+        ]
+        with self.connection.cursor() as cur:
+            for query in queries:
+                cur.execute(query)
+            self.connection.commit()
+        logger.info("Tables created or verified successfully.")
 
     def _create_table_query(self, name):
-        """Generate SQL query for creating table."""
+        """
+        Generate SQL query for creating a table.
+
+        Args:
+            name (str): The name of the table to create.
+
+        Returns:
+            str: SQL query for creating the specified table.
+        """
         additional_columns = self._generate_additional_columns()
         return f"""
         CREATE TABLE IF NOT EXISTS {name} (
@@ -108,7 +138,12 @@ class DataCollector:
         """
 
     def _create_sensor_data_table_query(self):
-        """Generate SQL query for creating sensor_data table."""
+        """
+        Generate SQL query for creating the sensor_data table.
+
+        Returns:
+            str: SQL query for creating the sensor_data table.
+        """
         columns = [f"{model['column_name']} FLOAT" for model in self.config.model_infos.values()]
         return f"""
         CREATE TABLE IF NOT EXISTS sensor_data (
@@ -119,7 +154,12 @@ class DataCollector:
         """
 
     def _create_logs_table_query(self):
-        """Generate SQL query for creating logs table."""
+        """
+        Generate SQL query for creating the logs table.
+
+        Returns:
+            str: SQL query for creating the logs table.
+        """
         return """
         CREATE TABLE IF NOT EXISTS logs (
             id SERIAL PRIMARY KEY,
@@ -130,11 +170,22 @@ class DataCollector:
         """
 
     def _generate_additional_columns(self):
-        """Generate additional column definitions for models_performance table."""
+        """
+        Generate additional column definitions for models_performance table.
+
+        Returns:
+            list: List of additional column definitions.
+        """
         metrics = ['MAE', 'R2', 'SRC', 'MSE', 'RMSE', 'MAPE']
         return [f"{metric}_T_{i} FLOAT" for metric in metrics for i in range(24)]
 
     def _log_to_db(self, record):
+        """
+        Log a record to the database.
+
+        Args:
+            record: The log record to be inserted into the database.
+        """
         log_message = record.record['message']
         log_level = record.record["level"].name
         log_time = record.record["time"].timestamp()
@@ -147,6 +198,16 @@ class DataCollector:
         self.connection.commit()
 
     def _fetch_data(self, start_ts, end_ts):
+        """
+        Fetch data from the API for a given time range.
+
+        Args:
+            start_ts (int): Start timestamp in milliseconds.
+            end_ts (int): End timestamp in milliseconds.
+
+        Returns:
+            dict or None: JSON response from the API if successful, None otherwise.
+        """
         params = {'startTs': start_ts, 'endTs': end_ts}
         response = requests.get(self.api_url, params=params)
         if response.status_code == 200:
@@ -156,6 +217,13 @@ class DataCollector:
         return None
 
     def _upsert_data(self, df, dynamic_column_name):
+        """
+        Upsert (insert or update) data into the sensor_data table.
+
+        Args:
+            df (pandas.DataFrame): DataFrame containing the data to upsert.
+            dynamic_column_name (str): Name of the column to upsert.
+        """
         with self.connection.cursor() as cur:
             for idx, row in df.iterrows():
                 cur.execute(f"""
@@ -167,9 +235,21 @@ class DataCollector:
         self.connection.commit()
 
     def date_to_timestamp(self, date_str):
+        """
+        Convert a date string to a timestamp in milliseconds.
+
+        Args:
+            date_str (str): Date string in format "YYYY/MM/DD".
+
+        Returns:
+            int: Timestamp in milliseconds.
+        """
         return int(datetime.strptime(date_str, "%Y/%m/%d").timestamp()) * 1000
 
     def inject_historical_data(self):
+        """
+        Inject historical data from both API and CSV file into the database.
+        """
         try:
             latest_data = self._fetch_latest_data_API()
             start_ts = self.date_to_timestamp("2014/01/01")
@@ -195,6 +275,15 @@ class DataCollector:
             logger.error(f"An error occurred while injecting historical data: {e}")
 
     def _get_last_100_hours(self, up_to_time=None):
+        """
+        Retrieve the last 100 hours of data from the sensor_data table.
+
+        Args:
+            up_to_time (datetime, optional): The upper time limit for the data retrieval.
+
+        Returns:
+            tuple: A numpy array of the last 100 hours of data and the most recent timestamp.
+        """
         query = sql.SQL("""
         SELECT time, elec_prices_metric
         FROM sensor_data
@@ -214,6 +303,17 @@ class DataCollector:
             return np.array(values), times[0]
 
     def _predict_next_24_hours(self, last_100_hours, start_time, model_infos):
+        """
+        Predict the next 24 hours of electricity prices using the specified model.
+
+        Args:
+            last_100_hours (numpy.array): Array of the last 100 hours of data.
+            start_time (datetime): The start time for the prediction.
+            model_infos (dict): Information about the model to use for prediction.
+
+        Returns:
+            pandas.DataFrame: DataFrame containing the predictions for the next 24 hours.
+        """
         model = load(os.path.join(Main_path, model_infos["path"]))
         date_features = np.array([
             start_time.weekday(), 
@@ -231,6 +331,12 @@ class DataCollector:
         })
 
     def _fetch_latest_data_API(self):
+        """
+        Fetch the latest data from the API.
+
+        Returns:
+            datetime or None: The timestamp of the latest data if successful, None otherwise.
+        """
         response = requests.get(self.api_url_latest)
         if response.status_code == 200:
             latest_data = response.json()
@@ -240,6 +346,12 @@ class DataCollector:
         return None
 
     def _fetch_latest_data(self):
+        """
+        Fetch the latest data from the database.
+
+        Returns:
+            datetime: The timestamp of the latest data in the database.
+        """
         with self.connection.cursor() as cur:
             cur.execute("SELECT MAX(time) FROM sensor_data WHERE elec_prices_metric IS NOT NULL;")
             latest_time = cur.fetchone()[0]
@@ -248,7 +360,10 @@ class DataCollector:
 
     def _predict_historical_data(self, model_infos):
         """
-        Predict and insert data for all historical records using the model.
+        Predict and insert data for all historical records using the specified model.
+
+        Args:
+            model_infos (dict): Information about the model to use for prediction.
         """
         start_date = datetime.strptime(model_infos["periode"]["start_date"], "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
         current_time = start_date + timedelta(hours=102)
@@ -268,59 +383,13 @@ class DataCollector:
                 self._upsert_data(predictions_df,column_name)
             current_time += timedelta(hours=24)
         logger.info(f"Historical data prediction of {column_name} completed.")
-
-    def _retrain_model(self,model_infos):
-        column_name = model_infos["column_name"]
-        start_time = datetime.strptime(model_infos["periode"]["start_date"], "%Y-%m-%d %H:%M:%S")
-
-        if model_infos["periode"]["end_date"]:
-            end_time = datetime.strptime(model_infos["periode"]["end_date"], "%Y-%m-%d %H:%M:%S")
-        else:
-            end_time = datetime.now(timezone.utc)- timedelta(days=10)
-
-        end_time = end_time.replace(tzinfo=timezone.utc)
-
-        query = sql.SQL("""
-        SELECT time,elec_prices_metric
-        FROM sensor_data
-        WHERE time BETWEEN %s AND %s
-        """)
-
-        with self.connection.cursor() as cur:
-            cur.execute(query, (start_time, end_time))
-            data = cur.fetchall()
-
-        if len(data) < 100:
-            logger.error("Pas assez de données pour réentraîner le modèle.")
-            return
-
-        result_test,result_cross_val = self.runner.build_pipeline(data,model_infos)
-
-        # ============================================================================
-        # TO INSERT RESULT IN DATABASE
-        # TODO
-        # ============================================================================
-
-        # delete_query = [f"""DELETE FROM models_performance WHERE Model = '{column_name}' \
-        #     AND Horizon = {model_infos["horizon"][1]}""",
-        #     f"""DELETE FROM models_performance_crossval WHERE Model = '{column_name}' \
-        #     AND Horizon = {model_infos["horizon"][1]}"""
-        # ]
-        # with self.connection.cursor() as cur:
-        #     for query in delete_query:
-        #         cur.execute(query)
-        #     self.connection.commit()
-
-        # result_cross_val.columns = result_cross_val.columns.str.lower()
-        # result_cross_val.to_sql('models_performance_crossval', con=self.engine, if_exists='append', index=False)
-
-        # result_test.columns = result_test.columns.str.lower()
-        # result_test.to_sql('models_performance', con=self.engine, if_exists='append', index=False)
-
-        # logger.info("Données insérées avec succès dans la table models_performance.")
-        logger.info(f"Modèle {column_name} réentraîné et sauvegardé.")
-
     def fetch_and_insert_new_data(self):
+        """
+        Continuously fetch new data from the API and insert it into the database.
+
+        This method runs in an infinite loop, fetching new data every hour,
+        inserting it into the database, and making predictions using the available models.
+        """
         while True:
             # Récupérer la dernière donnée disponible via l'API
             latest_time = self._fetch_latest_data_API()
@@ -357,9 +426,12 @@ class DataCollector:
 
             time.sleep(3600)  # 1 heure
 
-
-
     def run(self):
+        """
+        Main method to run the data collection and prediction process.
+
+        This method initiates the continuous process of fetching and inserting new data.
+        """
         self.fetch_and_insert_new_data()
         print("ok")
 
